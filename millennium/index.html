@@ -1,0 +1,952 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#0B0C10" />
+<title>Millennium</title>
+<style>
+  :root {
+    --ink:        #0B0C10;
+    --surface:    #14161D;
+    --surface-2:  #1B1E27;
+    --line:       #23262F;
+    --text:       #F2F3F7;
+    --muted:      #8A8FA3;
+    --gold:       #E7C27D;
+    --gold-dim:   #A88B4F;
+    --mint:       #5FD3A0;
+    --coral:      #FF6B6B;
+    --card-a:     #1B1F3B;
+    --card-b:     #3A2E5F;
+
+    --r-lg: 26px;
+    --r-md: 18px;
+    --r-sm: 12px;
+
+    --shell: 460px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100%;
+  }
+
+  body {
+    display: flex;
+    justify-content: center;
+  }
+
+  .shell {
+    width: 100%;
+    max-width: var(--shell);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px calc(104px + env(safe-area-inset-bottom));
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ambient glow behind the balance */
+  .shell::before {
+    content: "";
+    position: absolute;
+    top: -180px;
+    left: 50%;
+    width: 520px;
+    height: 420px;
+    transform: translateX(-50%);
+    background: radial-gradient(closest-side, rgba(231,194,125,.16), rgba(231,194,125,0) 70%);
+    pointer-events: none;
+  }
+
+  /* ---------- top bar ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 22px 0 26px;
+    position: relative;
+  }
+
+  .avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(140deg, var(--card-a), var(--card-b));
+    border: 1px solid rgba(255,255,255,.09);
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    flex: none;
+  }
+
+  .who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+  .who .hello {
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .who .name {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    outline: none;
+    border-radius: 6px;
+    padding: 1px 3px;
+    margin-left: -3px;
+    max-width: 200px;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .topbar .spacer { flex: 1; }
+
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    flex: none;
+    transition: background .16s ease, border-color .16s ease;
+  }
+  .icon-btn:hover { background: var(--surface-2); border-color: #2E323D; }
+  .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+
+  /* ---------- balance ---------- */
+  .balance-block {
+    text-align: center;
+    padding: 6px 0 26px;
+    position: relative;
+  }
+
+  .balance-label {
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .amount-row {
+    display: inline-flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+    padding: 4px 14px;
+    border-radius: var(--r-md);
+    border: 1px solid transparent;
+    transition: border-color .18s ease, background .18s ease;
+    cursor: text;
+    max-width: 100%;
+  }
+  .amount-row:hover { border-color: var(--line); background: rgba(255,255,255,.02); }
+  .amount-row:focus-within {
+    border-color: rgba(231,194,125,.5);
+    background: rgba(231,194,125,.05);
+  }
+
+  .currency {
+    font-size: 34px;
+    font-weight: 500;
+    color: var(--gold);
+    line-height: 1;
+    cursor: pointer;
+    user-select: none;
+    align-self: center;
+    padding-top: 4px;
+  }
+
+  .amount {
+    font-size: 54px;
+    font-weight: 650;
+    letter-spacing: -.035em;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.06;
+    outline: none;
+    white-space: nowrap;
+    overflow-x: auto;
+    max-width: 100%;
+    scrollbar-width: none;
+  }
+  .amount::-webkit-scrollbar { display: none; }
+
+  .cents {
+    font-size: 30px;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: -.02em;
+    font-variant-numeric: tabular-nums;
+    outline: none;
+    align-self: baseline;
+  }
+
+  .edit-hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .edit-hint svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+
+  /* ---------- account card ---------- */
+  .card {
+    border-radius: var(--r-lg);
+    padding: 20px;
+    background:
+      radial-gradient(120% 140% at 8% 0%, rgba(231,194,125,.16), rgba(231,194,125,0) 55%),
+      linear-gradient(135deg, var(--card-a), var(--card-b));
+    border: 1px solid rgba(255,255,255,.08);
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+    margin-bottom: 22px;
+  }
+
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-brand {
+    font-size: 12px;
+    letter-spacing: .3em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.72);
+  }
+
+  .card-type {
+    font-size: 10px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--gold);
+    border: 1px solid rgba(231,194,125,.35);
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
+
+  .card-number {
+    font-size: 17px;
+    letter-spacing: .18em;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255,255,255,.9);
+  }
+
+  .card-foot {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .card-foot .k {
+    font-size: 9px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,.5);
+    margin-bottom: 4px;
+  }
+  .card-foot .v { font-size: 13px; color: rgba(255,255,255,.92); }
+
+  .card-mark { display: flex; align-items: center; }
+  .card-mark span {
+    width: 26px; height: 26px; border-radius: 50%;
+    background: rgba(255,255,255,.55);
+  }
+  .card-mark span + span { margin-left: -10px; background: var(--gold); }
+
+  /* ---------- quick actions ---------- */
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  .action {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--r-md);
+    padding: 14px 6px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    color: var(--text);
+    font-size: 11px;
+    letter-spacing: .01em;
+    cursor: pointer;
+    transition: transform .14s ease, background .16s ease, border-color .16s ease;
+  }
+  .action:hover { background: var(--surface-2); border-color: #2E323D; transform: translateY(-2px); }
+  .action:active { transform: translateY(0); }
+  .action svg { width: 19px; height: 19px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+
+  /* ---------- transactions ---------- */
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .section-head h2 {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    margin: 0;
+  }
+
+  .link-btn {
+    background: none;
+    border: none;
+    color: var(--gold);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 4px 2px;
+    letter-spacing: .01em;
+  }
+  .link-btn:hover { text-decoration: underline; }
+
+  .day-label {
+    font-size: 11px;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 20px 0 10px;
+  }
+  .day-label:first-of-type { margin-top: 4px; }
+
+  .ledger { display: flex; flex-direction: column; gap: 4px; }
+
+  .tx {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 11px 12px;
+    border-radius: var(--r-md);
+    transition: background .16s ease;
+    position: relative;
+  }
+  .tx:hover { background: var(--surface); }
+
+  .tx-avatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    flex: none;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+  }
+  .tx-avatar.in { color: var(--mint); border-color: rgba(95,211,160,.3); background: rgba(95,211,160,.08); }
+
+  .tx-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+
+  .tx-name {
+    font-size: 14.5px;
+    font-weight: 500;
+    letter-spacing: -.005em;
+    outline: none;
+    border-radius: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tx-meta { font-size: 12px; color: var(--muted); }
+
+  .tx-amt {
+    font-size: 14.5px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+    outline: none;
+    border-radius: 5px;
+    padding: 2px 4px;
+    white-space: nowrap;
+  }
+  .tx-amt.in { color: var(--mint); }
+
+  .tx-del {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--surface-2);
+    color: var(--muted);
+    display: none;
+    place-items: center;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .tx:hover .tx-del { display: grid; }
+  .tx-del:hover { color: var(--coral); border-color: rgba(255,107,107,.4); }
+
+  [contenteditable]:focus {
+    background: rgba(231,194,125,.09);
+    box-shadow: 0 0 0 1px rgba(231,194,125,.35);
+  }
+
+  .add-tx {
+    margin-top: 16px;
+    width: 100%;
+    padding: 13px;
+    border-radius: var(--r-md);
+    border: 1px dashed var(--line);
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    transition: color .16s ease, border-color .16s ease;
+  }
+  .add-tx:hover { color: var(--gold); border-color: rgba(231,194,125,.4); }
+
+  /* ---------- bottom nav ---------- */
+  .nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: var(--shell);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(11,12,16,.72), rgba(11,12,16,.98) 45%);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--line);
+    z-index: 20;
+  }
+
+  .nav button {
+    background: none;
+    border: none;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    padding: 6px 0;
+    cursor: pointer;
+    border-radius: var(--r-sm);
+    transition: color .16s ease;
+  }
+  .nav button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .nav button[aria-current="page"] { color: var(--gold); }
+  .nav button:hover { color: var(--text); }
+
+  /* ---------- toast ---------- */
+  .toast {
+    position: fixed;
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translate(-50%, 12px);
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s ease, transform .2s ease;
+    z-index: 30;
+  }
+  .toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+  :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header class="topbar">
+    <div class="avatar" id="initials">G</div>
+    <div class="who">
+      <span class="hello">Good evening</span>
+      <span class="name" id="userName" contenteditable="true" spellcheck="false">Gabriel</span>
+    </div>
+    <div class="spacer"></div>
+    <button class="icon-btn" id="btnReset" title="Reset to defaults" aria-label="Reset to defaults">
+      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+    </button>
+    <button class="icon-btn" title="Notifications" aria-label="Notifications">
+      <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+    </button>
+  </header>
+
+  <section class="balance-block">
+    <div class="balance-label">Total balance</div>
+    <div class="amount-row" id="amountRow">
+      <span class="currency" id="currency" title="Tap to change currency">€</span><span
+        class="amount" id="amount" contenteditable="true" spellcheck="false" inputmode="decimal">12 480</span><span
+        class="cents" id="cents" contenteditable="true" spellcheck="false" inputmode="numeric">,50</span>
+    </div>
+    <div class="edit-hint">
+      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      Tap the balance to edit it
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-top">
+      <span class="card-brand">Millennium</span>
+      <span class="card-type">Metal</span>
+    </div>
+    <div class="card-number" id="cardNumber">5312 •••• •••• 8842</div>
+    <div class="card-foot">
+      <div>
+        <div class="k">Card holder</div>
+        <div class="v" id="cardHolder">Gabriel</div>
+      </div>
+      <div>
+        <div class="k">Expires</div>
+        <div class="v">09/29</div>
+      </div>
+      <div class="card-mark"><span></span><span></span></div>
+    </div>
+  </section>
+
+  <nav class="actions" aria-label="Quick actions">
+    <button class="action" data-act="Transfer sent">
+      <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+      Transfer
+    </button>
+    <button class="action" data-act="Request created">
+      <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+      Request
+    </button>
+    <button class="action" data-act="Ready to pay">
+      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+      Pay
+    </button>
+    <button class="action" data-act="Exchange opened">
+      <svg viewBox="0 0 24 24"><path d="M3 8h14l-3-3"/><path d="M21 16H7l3 3"/></svg>
+      Exchange
+    </button>
+  </nav>
+
+  <section>
+    <div class="section-head">
+      <h2>Transactions</h2>
+      <button class="link-btn" id="btnClear">Clear all</button>
+    </div>
+    <div id="ledger"></div>
+    <button class="add-tx" id="btnAdd">+ Add a transaction</button>
+  </section>
+
+</div>
+
+<nav class="nav" aria-label="Main">
+  <button aria-current="page" data-tab="Home">
+    <svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
+    Home
+  </button>
+  <button data-tab="Cards">
+    <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+    Cards
+  </button>
+  <button data-tab="Payments">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M15 9.5a3 3 0 0 0-3-1.5c-3 0-3 4 0 4s3 4 0 4a3 3 0 0 1-3-1.5"/></svg>
+    Payments
+  </button>
+  <button data-tab="Profile">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
+    Profile
+  </button>
+</nav>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORE = "millennium.v1";
+  var CURRENCIES = ["€", "$", "£", "zł", "CHF"];
+
+  var DEFAULTS = {
+    name: "Gabriel",
+    currency: "€",
+    amount: "12 480",
+    cents: ",50",
+    tx: [
+      { day: "Today",     name: "Salary — Northwind Ltd", meta: "Incoming transfer", amt: "3 200,00", in: true },
+      { day: "Today",     name: "Carrefour",              meta: "Groceries",         amt: "48,20",    in: false },
+      { day: "Today",     name: "Spotify",                meta: "Subscription",      amt: "10,99",    in: false },
+      { day: "Yesterday", name: "Uber",                   meta: "Transport",         amt: "14,60",    in: false },
+      { day: "Yesterday", name: "Ana Ribeiro",            meta: "Split — dinner",    amt: "26,00",    in: true },
+      { day: "Yesterday", name: "Apple",                  meta: "iCloud storage",    amt: "2,99",     in: false }
+    ]
+  };
+
+  var state = load();
+
+  var el = {
+    name:       document.getElementById("userName"),
+    initials:   document.getElementById("initials"),
+    currency:   document.getElementById("currency"),
+    amount:     document.getElementById("amount"),
+    cents:      document.getElementById("cents"),
+    amountRow:  document.getElementById("amountRow"),
+    ledger:     document.getElementById("ledger"),
+    cardHolder: document.getElementById("cardHolder"),
+    toast:      document.getElementById("toast")
+  };
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(STORE);
+      if (!raw) return clone(DEFAULTS);
+      var parsed = JSON.parse(raw);
+      if (!parsed || !Array.isArray(parsed.tx)) return clone(DEFAULTS);
+      return parsed;
+    } catch (e) {
+      return clone(DEFAULTS);
+    }
+  }
+
+  function save() {
+    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* private mode */ }
+  }
+
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+
+  var toastTimer;
+  function toast(msg) {
+    el.toast.textContent = msg;
+    el.toast.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.toast.classList.remove("show"); }, 1800);
+  }
+
+  /* ---------- greeting + identity ---------- */
+
+  function greeting() {
+    var h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 18) return "Good afternoon";
+    return "Good evening";
+  }
+
+  function renderIdentity() {
+    el.name.textContent = state.name;
+    el.cardHolder.textContent = state.name;
+    el.initials.textContent = (state.name.trim()[0] || "M").toUpperCase();
+    document.querySelector(".hello").textContent = greeting();
+  }
+
+  /* ---------- balance ---------- */
+
+  // Keeps only digits and the grouping spaces the user sees.
+  function cleanWhole(text) {
+    var digits = text.replace(/\D/g, "").slice(0, 12);
+    if (!digits) return "0";
+    digits = digits.replace(/^0+(?=\d)/, "");
+    return digits.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  }
+
+  function cleanCents(text) {
+    var digits = text.replace(/\D/g, "").slice(0, 2);
+    while (digits.length < 2) digits += "0";
+    return "," + digits;
+  }
+
+  // Rewriting textContent replaces the text node and drops any caret inside it,
+  // so only touch a field whose text actually changed.
+  function setText(node, value) {
+    if (node.textContent !== value) node.textContent = value;
+  }
+
+  function renderBalance() {
+    setText(el.currency, state.currency);
+    setText(el.amount, state.amount);
+    setText(el.cents, state.cents);
+  }
+
+  function commitBalance() {
+    state.amount = cleanWhole(el.amount.textContent);
+    state.cents = cleanCents(el.cents.textContent);
+    renderBalance();
+    save();
+  }
+
+  el.amount.addEventListener("blur", commitBalance);
+  el.cents.addEventListener("blur", commitBalance);
+
+  // The cents field only holds two digits, so focusing it selects both —
+  // typing replaces rather than appending past the limit.
+  el.cents.addEventListener("focus", function () {
+    var range = document.createRange();
+    range.selectNodeContents(el.cents);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  });
+
+  [el.amount, el.cents].forEach(function (node) {
+    node.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") { e.preventDefault(); node.blur(); }
+    });
+    node.addEventListener("paste", function (e) {
+      e.preventDefault();
+      var text = (e.clipboardData || window.clipboardData).getData("text");
+      document.execCommand("insertText", false, text.replace(/[^\d]/g, ""));
+    });
+  });
+
+  // Clicking the padding around the number puts the caret in the whole-number
+  // field — but never steal focus from a field the click already landed in.
+  // Reformatting on blur changes the row's width, so the element under the
+  // cursor at mouseup may no longer be the one that was pressed.
+  el.amountRow.addEventListener("click", function () {
+    var active = document.activeElement;
+    if (active === el.amount || active === el.cents) return;
+    placeCaretEnd(el.amount);
+  });
+
+  el.currency.addEventListener("click", function () {
+    var i = CURRENCIES.indexOf(state.currency);
+    state.currency = CURRENCIES[(i + 1) % CURRENCIES.length];
+    renderBalance();
+    save();
+    toast("Currency set to " + state.currency);
+  });
+
+  function placeCaretEnd(node) {
+    node.focus();
+    var range = document.createRange();
+    range.selectNodeContents(node);
+    range.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* ---------- name ---------- */
+
+  el.name.addEventListener("blur", function () {
+    var v = el.name.textContent.replace(/\s+/g, " ").trim().slice(0, 28);
+    state.name = v || "Millennium";
+    renderIdentity();
+    save();
+  });
+  el.name.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { e.preventDefault(); el.name.blur(); }
+  });
+
+  /* ---------- transactions ---------- */
+
+  function initialsOf(name) {
+    // Only word-like tokens count, so "Salary — Northwind" reads SN, not S—.
+    var parts = name.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    if (!parts.length) return "?";
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  function renderLedger() {
+    el.ledger.innerHTML = "";
+    var lastDay = null;
+
+    state.tx.forEach(function (t, index) {
+      if (t.day !== lastDay) {
+        lastDay = t.day;
+        var label = document.createElement("div");
+        label.className = "day-label";
+        label.textContent = t.day;
+        el.ledger.appendChild(label);
+
+        var group = document.createElement("div");
+        group.className = "ledger";
+        group.dataset.day = t.day;
+        el.ledger.appendChild(group);
+      }
+
+      el.ledger.lastElementChild.appendChild(buildRow(t, index));
+    });
+
+    if (!state.tx.length) {
+      var empty = document.createElement("div");
+      empty.className = "day-label";
+      empty.textContent = "No transactions yet";
+      el.ledger.appendChild(empty);
+    }
+  }
+
+  function buildRow(t, index) {
+    var row = document.createElement("div");
+    row.className = "tx";
+    row.dataset.index = index;
+
+    var av = document.createElement("div");
+    av.className = "tx-avatar" + (t.in ? " in" : "");
+    av.textContent = initialsOf(t.name);
+
+    var body = document.createElement("div");
+    body.className = "tx-body";
+
+    var name = document.createElement("div");
+    name.className = "tx-name";
+    name.contentEditable = "true";
+    name.spellcheck = false;
+    name.textContent = t.name;
+
+    var meta = document.createElement("div");
+    meta.className = "tx-meta";
+    meta.contentEditable = "true";
+    meta.spellcheck = false;
+    meta.textContent = t.meta;
+
+    body.appendChild(name);
+    body.appendChild(meta);
+
+    var amt = document.createElement("div");
+    amt.className = "tx-amt" + (t.in ? " in" : "");
+    amt.contentEditable = "true";
+    amt.spellcheck = false;
+    amt.textContent = (t.in ? "+" : "−") + state.currency + t.amt;
+    amt.title = "Click to edit — start with + for money in";
+
+    var del = document.createElement("button");
+    del.className = "tx-del";
+    del.type = "button";
+    del.textContent = "×";
+    del.setAttribute("aria-label", "Delete transaction");
+
+    name.addEventListener("blur", function () {
+      t.name = name.textContent.trim().slice(0, 40) || "Untitled";
+      name.textContent = t.name;
+      av.textContent = initialsOf(t.name);
+      save();
+    });
+
+    meta.addEventListener("blur", function () {
+      t.meta = meta.textContent.trim().slice(0, 40) || "Payment";
+      meta.textContent = t.meta;
+      save();
+    });
+
+    amt.addEventListener("focus", function () {
+      amt.textContent = (t.in ? "+" : "") + t.amt;
+    });
+
+    amt.addEventListener("blur", function () {
+      var raw = amt.textContent;
+      t.in = /^\s*\+/.test(raw);
+      var digits = raw.replace(/\D/g, "").slice(0, 11) || "0";
+      while (digits.length < 3) digits = "0" + digits;
+      var whole = digits.slice(0, -2).replace(/^0+(?=\d)/, "");
+      whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+      t.amt = whole + "," + digits.slice(-2);
+      amt.classList.toggle("in", t.in);
+      av.classList.toggle("in", t.in);
+      amt.textContent = (t.in ? "+" : "−") + state.currency + t.amt;
+      save();
+    });
+
+    [name, meta, amt].forEach(function (node) {
+      node.addEventListener("keydown", function (e) {
+        if (e.key === "Enter") { e.preventDefault(); node.blur(); }
+      });
+    });
+
+    del.addEventListener("click", function () {
+      state.tx.splice(index, 1);
+      save();
+      renderLedger();
+      toast("Transaction removed");
+    });
+
+    row.appendChild(av);
+    row.appendChild(body);
+    row.appendChild(amt);
+    row.appendChild(del);
+    return row;
+  }
+
+  document.getElementById("btnAdd").addEventListener("click", function () {
+    state.tx.unshift({ day: "Today", name: "New payment", meta: "Tap to edit", amt: "0,00", in: false });
+    save();
+    renderLedger();
+    var first = el.ledger.querySelector(".tx-name");
+    if (first) placeCaretEnd(first);
+  });
+
+  document.getElementById("btnClear").addEventListener("click", function () {
+    if (!state.tx.length) { toast("Nothing to clear"); return; }
+    state.tx = [];
+    save();
+    renderLedger();
+    toast("Transactions cleared");
+  });
+
+  document.getElementById("btnReset").addEventListener("click", function () {
+    state = clone(DEFAULTS);
+    save();
+    renderAll();
+    toast("Reset to defaults");
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".action"), function (b) {
+    b.addEventListener("click", function () { toast(b.dataset.act); });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".nav button"), function (b) {
+    b.addEventListener("click", function () {
+      Array.prototype.forEach.call(document.querySelectorAll(".nav button"), function (o) {
+        o.removeAttribute("aria-current");
+      });
+      b.setAttribute("aria-current", "page");
+      toast(b.dataset.tab);
+    });
+  });
+
+  function renderAll() {
+    renderIdentity();
+    renderBalance();
+    renderLedger();
+  }
+
+  renderAll();
+})();
+</script>
+</body>
+</html>
