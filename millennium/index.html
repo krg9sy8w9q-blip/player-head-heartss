@@ -134,7 +134,7 @@
   /* ---------- balance ---------- */
   .balance-block {
     text-align: center;
-    padding: 6px 0 26px;
+    padding: 10px 0 34px;
     position: relative;
   }
 
@@ -199,16 +199,6 @@
     align-self: baseline;
   }
 
-  .edit-hint {
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--muted);
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .edit-hint svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
-
   /* ---------- quick actions ---------- */
   .actions {
     display: grid;
@@ -239,8 +229,9 @@
   /* ---------- transactions ---------- */
   .section-head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
+    gap: 12px;
     margin-bottom: 14px;
   }
 
@@ -276,8 +267,8 @@
   .tx {
     display: flex;
     align-items: center;
-    gap: 13px;
-    padding: 11px 12px;
+    gap: 11px;
+    padding: 11px 10px 11px 12px;
     border-radius: var(--r-md);
     transition: background .16s ease;
     position: relative;
@@ -331,43 +322,56 @@
   }
   .tx-new { animation: tx-arrive 1.6s ease-out 1; }
 
+  /* A flex item rather than an overlay: floating it over the row covered the
+     amount, and a hover-only control can't be reached on a touch screen. */
   .tx-del {
-    position: absolute;
-    right: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 26px; height: 26px;
+    flex: none;
+    width: 28px; height: 28px;
     border-radius: 50%;
     border: 1px solid var(--line);
     background: var(--surface-2);
     color: var(--muted);
-    display: none;
+    display: grid;
     place-items: center;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 15px;
     line-height: 1;
+    opacity: .4;
+    transition: opacity .16s ease, color .16s ease, border-color .16s ease;
   }
-  .tx:hover .tx-del { display: grid; }
-  .tx-del:hover { color: var(--coral); border-color: rgba(255,107,107,.4); }
+  .tx:hover .tx-del { opacity: 1; }
+  .tx-del:hover, .tx-del:focus-visible {
+    opacity: 1;
+    color: var(--coral);
+    border-color: rgba(255,107,107,.4);
+  }
 
   [contenteditable]:focus {
     background: rgba(231,194,125,.09);
     box-shadow: 0 0 0 1px rgba(231,194,125,.35);
   }
 
+  /* Sits in the section header, directly above where a new row appears —
+     a button further down the page would scroll the row out from under it. */
+  .head-tools { display: flex; align-items: center; gap: 8px; }
+
   .add-tx {
-    margin-top: 16px;
-    width: 100%;
-    padding: 13px;
-    border-radius: var(--r-md);
-    border: 1px dashed var(--line);
-    background: transparent;
-    color: var(--muted);
-    font-size: 13px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 13px 7px 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(231,194,125,.4);
+    background: rgba(231,194,125,.08);
+    color: var(--gold);
+    font-size: 12.5px;
+    font-weight: 500;
     cursor: pointer;
-    transition: color .16s ease, border-color .16s ease;
+    transition: background .16s ease, border-color .16s ease;
   }
-  .add-tx:hover { color: var(--gold); border-color: rgba(231,194,125,.4); }
+  .add-tx:hover { background: rgba(231,194,125,.16); border-color: rgba(231,194,125,.7); }
+  .add-tx:active { background: rgba(231,194,125,.24); }
+  .add-tx svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
   /* ---------- bottom nav ---------- */
   .nav {
@@ -457,10 +461,6 @@
         class="amount" id="amount" contenteditable="true" spellcheck="false" inputmode="decimal">12 480</span><span
         class="cents" id="cents" contenteditable="true" spellcheck="false" inputmode="numeric">,50</span>
     </div>
-    <div class="edit-hint">
-      <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-      Tap the balance to edit it
-    </div>
   </section>
 
   <nav class="actions" aria-label="Quick actions">
@@ -485,10 +485,15 @@
   <section>
     <div class="section-head">
       <h2>Transactions</h2>
-      <button class="link-btn" id="btnClear">Clear all</button>
+      <div class="head-tools">
+        <button class="add-tx" id="btnAdd">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+          Add
+        </button>
+        <button class="link-btn" id="btnClear">Clear all</button>
+      </div>
     </div>
     <div id="ledger"></div>
-    <button class="add-tx" id="btnAdd">+ Add a transaction</button>
   </section>
 
 </div>
