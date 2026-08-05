@@ -10,7 +10,7 @@ import { writeFileSync } from "node:fs";
 
 const SLOTS = 12;          // blank rows the Add button can reveal
 const DEFAULTS = [
-  { name: "Salary — Northwind Ltd", meta: "Incoming transfer", num: "3 200,00", inbound: true },
+  { name: "Salary — Northwind Ltd", meta: "Incoming transfer", num: "3\u00a0200,00", inbound: true },
   { name: "Carrefour",              meta: "Groceries",         num: "48,20",    inbound: false },
   { name: "Spotify",                meta: "Subscription",      num: "10,99",    inbound: false },
   { name: "Uber",                   meta: "Transport",         num: "14,60",    inbound: false, day: "Yesterday" },
@@ -66,7 +66,7 @@ function txRow(n, { name, meta, num, inbound, slot }) {
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-${n}">${meta}</span>
           </span>
           <span class="tx-amt${inbound ? " in" : ""}">
-            <button type="button" class="tx-sign" data-k="sg-${n}" title="Switch between money in and out">${inbound ? "+" : "−"}</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-${n}">${num}</span>
+            <button type="button" class="tx-sign" data-k="sg-${n}" title="Switch between money in and out">${inbound ? "+" : "−"}</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-${n}">${num}</span>
           </span>
           <label class="tx-del" for="del-${n}" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>`;
@@ -313,7 +313,7 @@ const html = `<!doctype html>
   .balance-label { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); margin: 0 0 14px; }
 
   .amount-row {
-    display: inline-flex; align-items: baseline; gap: 2px;
+    display: inline-flex; align-items: baseline; justify-content: center; gap: 2px;
     padding: 6px 14px; border-radius: var(--r-md);
     border: 1px solid transparent; cursor: text; max-width: 100%;
     transition: border-color .18s ease, background .18s ease;
@@ -327,10 +327,12 @@ const html = `<!doctype html>
 
   .amount {
     font-size: 56px; font-weight: 650; letter-spacing: -.04em; line-height: 1.05;
-    font-variant-numeric: tabular-nums; outline: none; white-space: nowrap;
-    overflow-x: auto; max-width: 100%; scrollbar-width: none;
+    font-variant-numeric: tabular-nums; outline: none;
+    overflow-wrap: break-word; min-width: 0;
   }
-  .amount::-webkit-scrollbar { display: none; }
+  /* Words need more room than digits, so long values step down a size. */
+  .amount.long   { font-size: 40px; letter-spacing: -.03em; }
+  .amount.longer { font-size: 28px; letter-spacing: -.02em; line-height: 1.15; }
   .cents { font-size: 30px; font-weight: 600; color: var(--muted); letter-spacing: -.02em; font-variant-numeric: tabular-nums; outline: none; }
 
   .month-strip { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
@@ -584,10 +586,10 @@ ${Array.from({ length: DEFAULTS.length + SLOTS }, (_, i) => `  <input class="sta
 
       <div class="balance">
         <p class="balance-label">Total balance</p>
-        <span class="amount-row" id="amountRow"><span class="cur-lg"></span><span class="amount" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="whole">12 480</span><span class="cents" contenteditable="true" spellcheck="false" inputmode="numeric" data-k="cents">,50</span></span>
+        <span class="amount-row" id="amountRow"><span class="cur-lg"></span><span class="amount" contenteditable="true" spellcheck="false" inputmode="text" data-k="whole">12 480</span><span class="cents" contenteditable="true" spellcheck="false" inputmode="text" data-k="cents">,50</span></span>
         <div class="month-strip">
           <span class="chip">Spent <b><span class="cur"></span>76,78</b></span>
-          <span class="chip up">Received <b><span class="cur"></span>3 226,00</b></span>
+          <span class="chip up">Received <b><span class="cur"></span>3 226,00</b></span>
         </div>
       </div>
 
@@ -631,7 +633,7 @@ ${bar("Subscriptions", 18, "13,98", "mint")}
 
       <div class="balance">
         <p class="balance-label">Card spending this month</p>
-        <span class="amount-row"><span class="cur-lg"></span><span class="amount" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="card-whole">76</span><span class="cents" contenteditable="true" spellcheck="false" inputmode="numeric" data-k="card-cents">,78</span></span>
+        <span class="amount-row"><span class="cur-lg"></span><span class="amount" contenteditable="true" spellcheck="false" inputmode="text" data-k="card-whole">76</span><span class="cents" contenteditable="true" spellcheck="false" inputmode="text" data-k="card-cents">,78</span></span>
       </div>
 
       <section class="section">
@@ -647,7 +649,7 @@ ${toggle("sw-abroad", "Payments abroad", "Outside the euro area", false)}
       <section class="section">
         <div class="section-head"><h2>Limits</h2></div>
         <div class="panel">
-${row("card", "Monthly limit", '<span class="cur"></span>2 000,00')}
+${row("card", "Monthly limit", '<span class="cur"></span>2 000,00')}
 ${row("lock", "Single payment", '<span class="cur"></span>500,00')}
 ${row("globe", "Cash withdrawal", '<span class="cur"></span>400,00')}
 ${row("wifi", "Contactless cap", '<span class="cur"></span>50,00')}
@@ -794,29 +796,54 @@ ${row("face", "App version", "1.2")}
     });
   }
 
-  /* ---------- number shaping ---------- */
+  /* ---------- amount shaping ---------- */
+
+  // Amounts take words as happily as digits: "a fortune" stays exactly as
+  // typed, while a plain number still gets its thousands spacing. Anything
+  // that isn't purely digits and spaces is left alone.
+  function isPlainNumber(text) { return /^[\\d\\s]*$/.test(text); }
+
+  function tidyWords(text, limit) {
+    return text.replace(/\\s+/g, " ").trim().slice(0, limit);
+  }
 
   function groupWhole(text) {
+    if (!isPlainNumber(text)) return tidyWords(text, 28);
     var digits = text.replace(/\\D/g, "").slice(0, 12);
     if (!digits) return "0";
     digits = digits.replace(/^0+(?=\\d)/, "");
-    return digits.replace(/\\B(?=(\\d{3})+(?!\\d))/g, " ");
+    return digits.replace(/\\B(?=(\\d{3})+(?!\\d))/g, "\u00a0");
   }
 
   function twoCents(text) {
-    var digits = text.replace(/\\D/g, "").slice(0, 2);
+    var bare = text.replace(/^[,.]/, "");
+    if (!isPlainNumber(bare)) return "\u00a0" + tidyWords(bare, 14);
+    var digits = bare.replace(/\\D/g, "").slice(0, 2);
     while (digits.length < 2) digits += "0";
     return "," + digits;
   }
 
   function fullAmount(text) {
+    if (!/^[\\d\\s.,]*$/.test(text)) return tidyWords(text, 20);
     var digits = text.replace(/\\D/g, "").slice(0, 11) || "0";
     while (digits.length < 3) digits = "0" + digits;
     return groupWhole(digits.slice(0, -2)) + "," + digits.slice(-2);
   }
 
+  function fitAmount(node) {
+    var len = node.textContent.trim().length;
+    node.classList.toggle("long", len > 11 && len <= 18);
+    node.classList.toggle("longer", len > 18);
+  }
+
   Array.prototype.forEach.call(document.querySelectorAll(".amount"), function (node) {
-    node.addEventListener("blur", function () { node.textContent = groupWhole(node.textContent); write(); });
+    fitAmount(node);
+    node.addEventListener("input", function () { fitAmount(node); });
+    node.addEventListener("blur", function () {
+      node.textContent = groupWhole(node.textContent);
+      fitAmount(node);
+      write();
+    });
   });
 
   Array.prototype.forEach.call(document.querySelectorAll(".cents"), function (node) {
@@ -841,8 +868,7 @@ ${row("face", "App version", "1.2")}
     node.addEventListener("paste", function (e) {
       e.preventDefault();
       var text = (e.clipboardData || window.clipboardData).getData("text");
-      var plain = /tx-num|amount|cents/.test(node.className) ? text.replace(/[^\\d]/g, "") : text;
-      document.execCommand("insertText", false, plain);
+      document.execCommand("insertText", false, text.replace(/[\\r\\n]+/g, " "));
     });
     node.addEventListener("blur", write);
   });
@@ -947,6 +973,7 @@ ${row("face", "App version", "1.2")}
 
   restore();
   syncUser();
+  Array.prototype.forEach.call(document.querySelectorAll(".amount"), fitAmount);
 })();
 </script>
 </body>
