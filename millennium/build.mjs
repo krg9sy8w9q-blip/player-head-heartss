@@ -60,13 +60,13 @@ const ICONS = {
 function txRow(n, { name, meta, num, inbound, slot }) {
   return `
         <div class="tx r-${n}${slot ? " is-slot" : ""}">
-          <span class="tx-avatar${inbound ? " in" : ""}" data-k="av-${n}">${initials(name)}</span>
+          <span class="tx-avatar" data-k="av-${n}">${initials(name)}</span>
           <span class="tx-body">
             <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-${n}">${name}</span>
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-${n}">${meta}</span>
           </span>
-          <span class="tx-amt${inbound ? " in" : ""}">
-            <button type="button" class="tx-sign" data-k="sg-${n}" title="Switch between money in and out">${inbound ? "+" : "−"}</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-${n}">${num}</span>
+          <span class="tx-amt">
+            <label class="tx-sign" for="sign-${n}" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-${n}">${num}</span>
           </span>
           <label class="tx-del" for="del-${n}" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>`;
@@ -106,6 +106,14 @@ function stateRules() {
   out.push("");
   for (let i = 1; i <= SLOTS; i++) {
     out.push(`  #slot-${i}:checked ~ main label[for="slot-${i}"] { display: none; }`);
+  }
+  out.push("");
+  out.push("  /* Tapping the sign flips a row between money out and money in — the");
+  out.push("     symbol, the amount colour and the avatar all follow the one checkbox. */");
+  for (let i = 1; i <= DEFAULTS.length + SLOTS; i++) {
+    out.push(`  #sign-${i}:checked ~ main .r-${i} .tx-sign::after { content: "+"; }`);
+    out.push(`  #sign-${i}:checked ~ main .r-${i} .tx-amt { color: var(--mint); }`);
+    out.push(`  #sign-${i}:checked ~ main .r-${i} .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }`);
   }
   out.push("");
   out.push("  /* Deleting wins over revealing, so these rules come last. */");
@@ -414,7 +422,6 @@ const html = `<!doctype html>
     display: grid; place-items: center; font-size: 13.5px; font-weight: 600;
     background: var(--raise-2); border: 1px solid var(--line-soft);
   }
-  .tx-avatar.in { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
 
   .tx-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .tx-name { font-size: 14.5px; font-weight: 500; outline: none; border-radius: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -424,13 +431,19 @@ const html = `<!doctype html>
     display: inline-flex; align-items: baseline; flex: none;
     font-size: 14.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .tx-amt.in { color: var(--mint); }
   .tx-num { outline: none; border-radius: 5px; padding: 1px 2px; }
+
+  /* A label, not a button: tapping it flips the row's sign checkbox, which
+     works whether or not scripts are running. */
   .tx-sign {
-    background: none; border: none; padding: 0 1px 0 0; margin: 0;
-    color: inherit; font: inherit; cursor: default;
+    cursor: pointer; user-select: none;
+    /* Padding widens the thumb target; the negative margin keeps the sign
+       visually tight against the currency symbol. */
+    padding: 8px 4px 8px 8px; margin: -8px -3px -8px -8px;
+    border-radius: 6px; color: inherit;
   }
-  .js .tx-sign { cursor: pointer; }
+  .tx-sign::after { content: "\u2212"; }
+  .tx-sign:hover { background: rgba(255,255,255,.07); }
 
   .tx-del {
     flex: none; width: 28px; height: 28px; border-radius: 50%;
@@ -568,6 +581,10 @@ ${CURRENCIES.map((c, i) => `  <input class="state" type="radio" name="cur" id="c
 
 ${Array.from({ length: SLOTS }, (_, i) => `  <input class="state" type="checkbox" id="slot-${i + 1}" data-k="slot-${i + 1}" />`).join("\n")}
 ${Array.from({ length: DEFAULTS.length + SLOTS }, (_, i) => `  <input class="state" type="checkbox" id="del-${i + 1}" data-k="del-${i + 1}" />`).join("\n")}
+${Array.from({ length: DEFAULTS.length + SLOTS }, (_, i) => {
+  const on = DEFAULTS[i] && DEFAULTS[i].inbound ? " checked" : "";
+  return `  <input class="state" type="checkbox" id="sign-${i + 1}" data-k="sign-${i + 1}"${on} />`;
+}).join("\n")}
 
   <main>
 
@@ -881,23 +898,15 @@ ${row("face", "App version", "1.2")}
     return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  // The sign itself is a CSS toggle; script only keeps the avatar initials
+  // in step with the name.
   Array.prototype.forEach.call(document.querySelectorAll(".tx"), function (row) {
     var name = row.querySelector(".tx-name");
     var av = row.querySelector(".tx-avatar");
-    var sign = row.querySelector(".tx-sign");
-    var amt = row.querySelector(".tx-amt");
 
     name.addEventListener("blur", function () {
       name.textContent = name.textContent.trim().slice(0, 40) || "Untitled";
       av.textContent = initialsOf(name.textContent);
-      write();
-    });
-
-    sign.addEventListener("click", function () {
-      var inbound = sign.textContent.trim() !== "+";
-      sign.textContent = inbound ? "+" : "−";
-      amt.classList.toggle("in", inbound);
-      av.classList.toggle("in", inbound);
       write();
     });
   });

@@ -218,7 +218,6 @@
     display: grid; place-items: center; font-size: 13.5px; font-weight: 600;
     background: var(--raise-2); border: 1px solid var(--line-soft);
   }
-  .tx-avatar.in { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
 
   .tx-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .tx-name { font-size: 14.5px; font-weight: 500; outline: none; border-radius: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -228,13 +227,19 @@
     display: inline-flex; align-items: baseline; flex: none;
     font-size: 14.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap;
   }
-  .tx-amt.in { color: var(--mint); }
   .tx-num { outline: none; border-radius: 5px; padding: 1px 2px; }
+
+  /* A label, not a button: tapping it flips the row's sign checkbox, which
+     works whether or not scripts are running. */
   .tx-sign {
-    background: none; border: none; padding: 0 1px 0 0; margin: 0;
-    color: inherit; font: inherit; cursor: default;
+    cursor: pointer; user-select: none;
+    /* Padding widens the thumb target; the negative margin keeps the sign
+       visually tight against the currency symbol. */
+    padding: 8px 4px 8px 8px; margin: -8px -3px -8px -8px;
+    border-radius: 6px; color: inherit;
   }
-  .js .tx-sign { cursor: pointer; }
+  .tx-sign::after { content: "−"; }
+  .tx-sign:hover { background: rgba(255,255,255,.07); }
 
   .tx-del {
     flex: none; width: 28px; height: 28px; border-radius: 50%;
@@ -411,6 +416,63 @@
   #slot-11:checked ~ main label[for="slot-11"] { display: none; }
   #slot-12:checked ~ main label[for="slot-12"] { display: none; }
 
+  /* Tapping the sign flips a row between money out and money in — the
+     symbol, the amount colour and the avatar all follow the one checkbox. */
+  #sign-1:checked ~ main .r-1 .tx-sign::after { content: "+"; }
+  #sign-1:checked ~ main .r-1 .tx-amt { color: var(--mint); }
+  #sign-1:checked ~ main .r-1 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-2:checked ~ main .r-2 .tx-sign::after { content: "+"; }
+  #sign-2:checked ~ main .r-2 .tx-amt { color: var(--mint); }
+  #sign-2:checked ~ main .r-2 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-3:checked ~ main .r-3 .tx-sign::after { content: "+"; }
+  #sign-3:checked ~ main .r-3 .tx-amt { color: var(--mint); }
+  #sign-3:checked ~ main .r-3 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-4:checked ~ main .r-4 .tx-sign::after { content: "+"; }
+  #sign-4:checked ~ main .r-4 .tx-amt { color: var(--mint); }
+  #sign-4:checked ~ main .r-4 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-5:checked ~ main .r-5 .tx-sign::after { content: "+"; }
+  #sign-5:checked ~ main .r-5 .tx-amt { color: var(--mint); }
+  #sign-5:checked ~ main .r-5 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-6:checked ~ main .r-6 .tx-sign::after { content: "+"; }
+  #sign-6:checked ~ main .r-6 .tx-amt { color: var(--mint); }
+  #sign-6:checked ~ main .r-6 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-7:checked ~ main .r-7 .tx-sign::after { content: "+"; }
+  #sign-7:checked ~ main .r-7 .tx-amt { color: var(--mint); }
+  #sign-7:checked ~ main .r-7 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-8:checked ~ main .r-8 .tx-sign::after { content: "+"; }
+  #sign-8:checked ~ main .r-8 .tx-amt { color: var(--mint); }
+  #sign-8:checked ~ main .r-8 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-9:checked ~ main .r-9 .tx-sign::after { content: "+"; }
+  #sign-9:checked ~ main .r-9 .tx-amt { color: var(--mint); }
+  #sign-9:checked ~ main .r-9 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-10:checked ~ main .r-10 .tx-sign::after { content: "+"; }
+  #sign-10:checked ~ main .r-10 .tx-amt { color: var(--mint); }
+  #sign-10:checked ~ main .r-10 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-11:checked ~ main .r-11 .tx-sign::after { content: "+"; }
+  #sign-11:checked ~ main .r-11 .tx-amt { color: var(--mint); }
+  #sign-11:checked ~ main .r-11 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-12:checked ~ main .r-12 .tx-sign::after { content: "+"; }
+  #sign-12:checked ~ main .r-12 .tx-amt { color: var(--mint); }
+  #sign-12:checked ~ main .r-12 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-13:checked ~ main .r-13 .tx-sign::after { content: "+"; }
+  #sign-13:checked ~ main .r-13 .tx-amt { color: var(--mint); }
+  #sign-13:checked ~ main .r-13 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-14:checked ~ main .r-14 .tx-sign::after { content: "+"; }
+  #sign-14:checked ~ main .r-14 .tx-amt { color: var(--mint); }
+  #sign-14:checked ~ main .r-14 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-15:checked ~ main .r-15 .tx-sign::after { content: "+"; }
+  #sign-15:checked ~ main .r-15 .tx-amt { color: var(--mint); }
+  #sign-15:checked ~ main .r-15 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-16:checked ~ main .r-16 .tx-sign::after { content: "+"; }
+  #sign-16:checked ~ main .r-16 .tx-amt { color: var(--mint); }
+  #sign-16:checked ~ main .r-16 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-17:checked ~ main .r-17 .tx-sign::after { content: "+"; }
+  #sign-17:checked ~ main .r-17 .tx-amt { color: var(--mint); }
+  #sign-17:checked ~ main .r-17 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+  #sign-18:checked ~ main .r-18 .tx-sign::after { content: "+"; }
+  #sign-18:checked ~ main .r-18 .tx-amt { color: var(--mint); }
+  #sign-18:checked ~ main .r-18 .tx-avatar { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+
   /* Deleting wins over revealing, so these rules come last. */
   #del-1:checked ~ main .r-1 { display: none; }
   #del-2:checked ~ main .r-2 { display: none; }
@@ -489,6 +551,24 @@
   <input class="state" type="checkbox" id="del-16" data-k="del-16" />
   <input class="state" type="checkbox" id="del-17" data-k="del-17" />
   <input class="state" type="checkbox" id="del-18" data-k="del-18" />
+  <input class="state" type="checkbox" id="sign-1" data-k="sign-1" checked />
+  <input class="state" type="checkbox" id="sign-2" data-k="sign-2" />
+  <input class="state" type="checkbox" id="sign-3" data-k="sign-3" />
+  <input class="state" type="checkbox" id="sign-4" data-k="sign-4" />
+  <input class="state" type="checkbox" id="sign-5" data-k="sign-5" checked />
+  <input class="state" type="checkbox" id="sign-6" data-k="sign-6" />
+  <input class="state" type="checkbox" id="sign-7" data-k="sign-7" />
+  <input class="state" type="checkbox" id="sign-8" data-k="sign-8" />
+  <input class="state" type="checkbox" id="sign-9" data-k="sign-9" />
+  <input class="state" type="checkbox" id="sign-10" data-k="sign-10" />
+  <input class="state" type="checkbox" id="sign-11" data-k="sign-11" />
+  <input class="state" type="checkbox" id="sign-12" data-k="sign-12" />
+  <input class="state" type="checkbox" id="sign-13" data-k="sign-13" />
+  <input class="state" type="checkbox" id="sign-14" data-k="sign-14" />
+  <input class="state" type="checkbox" id="sign-15" data-k="sign-15" />
+  <input class="state" type="checkbox" id="sign-16" data-k="sign-16" />
+  <input class="state" type="checkbox" id="sign-17" data-k="sign-17" />
+  <input class="state" type="checkbox" id="sign-18" data-k="sign-18" />
 
   <main>
 
@@ -596,7 +676,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-7">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-7" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-7">0,00</span>
+            <label class="tx-sign" for="sign-7" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-7">0,00</span>
           </span>
           <label class="tx-del" for="del-7" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -607,7 +687,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-8">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-8" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-8">0,00</span>
+            <label class="tx-sign" for="sign-8" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-8">0,00</span>
           </span>
           <label class="tx-del" for="del-8" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -618,7 +698,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-9">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-9" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-9">0,00</span>
+            <label class="tx-sign" for="sign-9" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-9">0,00</span>
           </span>
           <label class="tx-del" for="del-9" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -629,7 +709,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-10">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-10" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-10">0,00</span>
+            <label class="tx-sign" for="sign-10" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-10">0,00</span>
           </span>
           <label class="tx-del" for="del-10" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -640,7 +720,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-11">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-11" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-11">0,00</span>
+            <label class="tx-sign" for="sign-11" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-11">0,00</span>
           </span>
           <label class="tx-del" for="del-11" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -651,7 +731,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-12">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-12" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-12">0,00</span>
+            <label class="tx-sign" for="sign-12" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-12">0,00</span>
           </span>
           <label class="tx-del" for="del-12" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -662,7 +742,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-13">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-13" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-13">0,00</span>
+            <label class="tx-sign" for="sign-13" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-13">0,00</span>
           </span>
           <label class="tx-del" for="del-13" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -673,7 +753,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-14">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-14" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-14">0,00</span>
+            <label class="tx-sign" for="sign-14" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-14">0,00</span>
           </span>
           <label class="tx-del" for="del-14" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -684,7 +764,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-15">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-15" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-15">0,00</span>
+            <label class="tx-sign" for="sign-15" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-15">0,00</span>
           </span>
           <label class="tx-del" for="del-15" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -695,7 +775,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-16">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-16" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-16">0,00</span>
+            <label class="tx-sign" for="sign-16" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-16">0,00</span>
           </span>
           <label class="tx-del" for="del-16" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -706,7 +786,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-17">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-17" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-17">0,00</span>
+            <label class="tx-sign" for="sign-17" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-17">0,00</span>
           </span>
           <label class="tx-del" for="del-17" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -717,18 +797,18 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-18">Tap to edit</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-18" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-18">0,00</span>
+            <label class="tx-sign" for="sign-18" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-18">0,00</span>
           </span>
           <label class="tx-del" for="del-18" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
         <div class="tx r-1">
-          <span class="tx-avatar in" data-k="av-1">SN</span>
+          <span class="tx-avatar" data-k="av-1">SN</span>
           <span class="tx-body">
             <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-1">Salary — Northwind Ltd</span>
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-1">Incoming transfer</span>
           </span>
-          <span class="tx-amt in">
-            <button type="button" class="tx-sign" data-k="sg-1" title="Switch between money in and out">+</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-1">3 200,00</span>
+          <span class="tx-amt">
+            <label class="tx-sign" for="sign-1" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-1">3 200,00</span>
           </span>
           <label class="tx-del" for="del-1" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -739,7 +819,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-2">Groceries</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-2" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-2">48,20</span>
+            <label class="tx-sign" for="sign-2" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-2">48,20</span>
           </span>
           <label class="tx-del" for="del-2" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -750,7 +830,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-3">Subscription</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-3" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-3">10,99</span>
+            <label class="tx-sign" for="sign-3" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-3">10,99</span>
           </span>
           <label class="tx-del" for="del-3" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -764,18 +844,18 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-4">Transport</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-4" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-4">14,60</span>
+            <label class="tx-sign" for="sign-4" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-4">14,60</span>
           </span>
           <label class="tx-del" for="del-4" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
         <div class="tx r-5">
-          <span class="tx-avatar in" data-k="av-5">AR</span>
+          <span class="tx-avatar" data-k="av-5">AR</span>
           <span class="tx-body">
             <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-5">Ana Ribeiro</span>
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-5">Split — dinner</span>
           </span>
-          <span class="tx-amt in">
-            <button type="button" class="tx-sign" data-k="sg-5" title="Switch between money in and out">+</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-5">26,00</span>
+          <span class="tx-amt">
+            <label class="tx-sign" for="sign-5" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-5">26,00</span>
           </span>
           <label class="tx-del" for="del-5" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -786,7 +866,7 @@
             <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-6">iCloud storage</span>
           </span>
           <span class="tx-amt">
-            <button type="button" class="tx-sign" data-k="sg-6" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-6">2,99</span>
+            <label class="tx-sign" for="sign-6" title="Switch between money out and money in"><span class="sr-only">Change sign</span></label><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="text" data-k="am-6">2,99</span>
           </span>
           <label class="tx-del" for="del-6" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
         </div>
@@ -1236,23 +1316,15 @@
     return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
   }
 
+  // The sign itself is a CSS toggle; script only keeps the avatar initials
+  // in step with the name.
   Array.prototype.forEach.call(document.querySelectorAll(".tx"), function (row) {
     var name = row.querySelector(".tx-name");
     var av = row.querySelector(".tx-avatar");
-    var sign = row.querySelector(".tx-sign");
-    var amt = row.querySelector(".tx-amt");
 
     name.addEventListener("blur", function () {
       name.textContent = name.textContent.trim().slice(0, 40) || "Untitled";
       av.textContent = initialsOf(name.textContent);
-      write();
-    });
-
-    sign.addEventListener("click", function () {
-      var inbound = sign.textContent.trim() !== "+";
-      sign.textContent = inbound ? "+" : "−";
-      amt.classList.toggle("in", inbound);
-      av.classList.toggle("in", inbound);
       write();
     });
   });
