@@ -17,8 +17,8 @@
     --gold-dim:   #A88B4F;
     --mint:       #5FD3A0;
     --coral:      #FF6B6B;
-    --card-a:     #1B1F3B;
-    --card-b:     #3A2E5F;
+    --plum-a:     #1B1F3B;
+    --plum-b:     #3A2E5F;
 
     --r-lg: 26px;
     --r-md: 18px;
@@ -83,7 +83,7 @@
     border-radius: 50%;
     display: grid;
     place-items: center;
-    background: linear-gradient(140deg, var(--card-a), var(--card-b));
+    background: linear-gradient(140deg, var(--plum-a), var(--plum-b));
     border: 1px solid rgba(255,255,255,.09);
     font-size: 15px;
     font-weight: 600;
@@ -209,74 +209,6 @@
   }
   .edit-hint svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
 
-  /* ---------- account card ---------- */
-  .card {
-    border-radius: var(--r-lg);
-    padding: 20px;
-    background:
-      radial-gradient(120% 140% at 8% 0%, rgba(231,194,125,.16), rgba(231,194,125,0) 55%),
-      linear-gradient(135deg, var(--card-a), var(--card-b));
-    border: 1px solid rgba(255,255,255,.08);
-    display: flex;
-    flex-direction: column;
-    gap: 26px;
-    margin-bottom: 22px;
-  }
-
-  .card-top {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .card-brand {
-    font-size: 12px;
-    letter-spacing: .3em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.72);
-  }
-
-  .card-type {
-    font-size: 10px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--gold);
-    border: 1px solid rgba(231,194,125,.35);
-    border-radius: 999px;
-    padding: 4px 10px;
-  }
-
-  .card-number {
-    font-size: 17px;
-    letter-spacing: .18em;
-    font-variant-numeric: tabular-nums;
-    color: rgba(255,255,255,.9);
-  }
-
-  .card-foot {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .card-foot .k {
-    font-size: 9px;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,.5);
-    margin-bottom: 4px;
-  }
-  .card-foot .v { font-size: 13px; color: rgba(255,255,255,.92); }
-
-  .card-mark { display: flex; align-items: center; }
-  .card-mark span {
-    width: 26px; height: 26px; border-radius: 50%;
-    background: rgba(255,255,255,.55);
-  }
-  .card-mark span + span { margin-left: -10px; background: var(--gold); }
-
   /* ---------- quick actions ---------- */
   .actions {
     display: grid;
@@ -392,6 +324,12 @@
     white-space: nowrap;
   }
   .tx-amt.in { color: var(--mint); }
+
+  @keyframes tx-arrive {
+    from { background: rgba(231,194,125,.14); }
+    to   { background: transparent; }
+  }
+  .tx-new { animation: tx-arrive 1.6s ease-out 1; }
 
   .tx-del {
     position: absolute;
@@ -525,25 +463,6 @@
     </div>
   </section>
 
-  <section class="card">
-    <div class="card-top">
-      <span class="card-brand">Millennium</span>
-      <span class="card-type">Metal</span>
-    </div>
-    <div class="card-number" id="cardNumber">5312 •••• •••• 8842</div>
-    <div class="card-foot">
-      <div>
-        <div class="k">Card holder</div>
-        <div class="v" id="cardHolder">Gabriel</div>
-      </div>
-      <div>
-        <div class="k">Expires</div>
-        <div class="v">09/29</div>
-      </div>
-      <div class="card-mark"><span></span><span></span></div>
-    </div>
-  </section>
-
   <nav class="actions" aria-label="Quick actions">
     <button class="action" data-act="Transfer sent">
       <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
@@ -627,7 +546,6 @@
     cents:      document.getElementById("cents"),
     amountRow:  document.getElementById("amountRow"),
     ledger:     document.getElementById("ledger"),
-    cardHolder: document.getElementById("cardHolder"),
     toast:      document.getElementById("toast")
   };
 
@@ -668,7 +586,6 @@
 
   function renderIdentity() {
     el.name.textContent = state.name;
-    el.cardHolder.textContent = state.name;
     el.initials.textContent = (state.name.trim()[0] || "M").toUpperCase();
     document.querySelector(".hello").textContent = greeting();
   }
@@ -755,6 +672,17 @@
     var range = document.createRange();
     range.selectNodeContents(node);
     range.collapse(false);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  // Highlights the whole value so the first keystroke replaces it — used for
+  // placeholder text on a freshly added row.
+  function selectContents(node) {
+    node.focus();
+    var range = document.createRange();
+    range.selectNodeContents(node);
     var sel = window.getSelection();
     sel.removeAllRanges();
     sel.addRange(range);
@@ -906,8 +834,15 @@
     state.tx.unshift({ day: "Today", name: "New payment", meta: "Tap to edit", amt: "0,00", in: false });
     save();
     renderLedger();
-    var first = el.ledger.querySelector(".tx-name");
-    if (first) placeCaretEnd(first);
+
+    // The new row goes to the top of the ledger, well above the button that
+    // was just pressed, so bring it into view and select its placeholder.
+    var row = el.ledger.querySelector(".tx");
+    if (!row) return;
+    row.classList.add("tx-new");
+    row.scrollIntoView({ block: "center", behavior: "smooth" });
+    selectContents(row.querySelector(".tx-name"));
+    toast("Transaction added");
   });
 
   document.getElementById("btnClear").addEventListener("click", function () {
