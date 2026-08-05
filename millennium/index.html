@@ -3,519 +3,1099 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<meta name="theme-color" content="#0B0C10" />
+<meta name="theme-color" content="#07080B" />
 <title>Millennium</title>
 <style>
   :root {
-    --ink:        #0B0C10;
-    --surface:    #14161D;
-    --surface-2:  #1B1E27;
-    --line:       #23262F;
-    --text:       #F2F3F7;
-    --muted:      #8A8FA3;
-    --gold:       #E7C27D;
-    --gold-dim:   #A88B4F;
-    --mint:       #5FD3A0;
-    --coral:      #FF6B6B;
-    --plum-a:     #1B1F3B;
-    --plum-b:     #3A2E5F;
+    --ink:       #07080B;
+    --raise:     #101219;
+    --raise-2:   #171A23;
+    --line:      #232734;
+    --line-soft: #1B1E28;
+    --text:      #F4F5F9;
+    --muted:     #868CA0;
+    --faint:     #5B6074;
+    --gold:      #E9C784;
+    --gold-deep: #C9A25C;
+    --mint:      #4FD6A0;
+    --coral:     #FF6F6F;
+    --plum-a:    #1C2140;
+    --plum-b:    #3C2F63;
 
-    --r-lg: 26px;
-    --r-md: 18px;
-    --r-sm: 12px;
-
-    --shell: 460px;
+    --r-lg: 24px;
+    --r-md: 16px;
+    --r-sm: 10px;
+    --shell: 470px;
   }
 
   * { box-sizing: border-box; }
 
-  html, body {
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
     margin: 0;
-    padding: 0;
     background: var(--ink);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
-    min-height: 100%;
-  }
-
-  body {
     display: flex;
     justify-content: center;
-  }
-
-  .shell {
-    width: 100%;
-    max-width: var(--shell);
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    padding: 0 20px calc(104px + env(safe-area-inset-bottom));
-    position: relative;
-    overflow: hidden;
   }
 
-  /* ambient glow behind the balance */
-  .shell::before {
-    content: "";
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* State inputs stay focusable for keyboard use but never take up space. */
+  .state {
     position: absolute;
-    top: -180px;
-    left: 50%;
-    width: 520px;
-    height: 420px;
-    transform: translateX(-50%);
-    background: radial-gradient(closest-side, rgba(231,194,125,.16), rgba(231,194,125,0) 70%);
+    opacity: 0;
+    width: 1px; height: 1px;
+    margin: 0;
     pointer-events: none;
   }
 
-  /* ---------- top bar ---------- */
-  .topbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 22px 0 26px;
+  .app {
+    width: 100%;
+    max-width: var(--shell);
     position: relative;
+    padding: 0 18px calc(100px + env(safe-area-inset-bottom));
   }
+
+  /* Kept inside the box: clipping this glow with overflow:hidden would also
+     clip the fixed nav, which paints it as a ghost at the top of the page. */
+  .app::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 300px;
+    background: radial-gradient(70% 90% at 50% -10%, rgba(233,199,132,.16), rgba(233,199,132,0) 72%);
+    pointer-events: none;
+  }
+
+  main { position: relative; }
+  .screen { display: none; animation: fade .22s ease both; }
+  @keyframes fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ---------- header ---------- */
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 20px 0 22px; }
 
   .avatar {
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    display: grid; place-items: center; flex: none;
     background: linear-gradient(140deg, var(--plum-a), var(--plum-b));
-    border: 1px solid rgba(255,255,255,.09);
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: .02em;
-    flex: none;
+    border: 1px solid rgba(255,255,255,.1);
+    font-size: 15px; font-weight: 600;
   }
 
-  .who { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-
-  .who .hello {
-    font-size: 11px;
-    letter-spacing: .16em;
-    text-transform: uppercase;
-    color: var(--muted);
+  .who { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .eyebrow { font-size: 10.5px; letter-spacing: .18em; text-transform: uppercase; color: var(--faint); }
+  .who-name {
+    font-size: 16px; font-weight: 600; letter-spacing: -.01em;
+    outline: none; border-radius: 6px; padding: 1px 4px; margin-left: -4px;
+    max-width: 210px; white-space: nowrap; overflow: hidden;
   }
+  .grow { flex: 1; }
 
-  .who .name {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -.01em;
-    outline: none;
-    border-radius: 6px;
-    padding: 1px 3px;
-    margin-left: -3px;
-    max-width: 200px;
-    overflow: hidden;
-    white-space: nowrap;
-  }
-
-  .topbar .spacer { flex: 1; }
-
-  .icon-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--surface);
-    color: var(--text);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    flex: none;
+  .round {
+    width: 38px; height: 38px; border-radius: 50%; flex: none;
+    border: 1px solid var(--line); background: var(--raise); color: var(--text);
+    display: grid; place-items: center; cursor: pointer;
     transition: background .16s ease, border-color .16s ease;
   }
-  .icon-btn:hover { background: var(--surface-2); border-color: #2E323D; }
-  .icon-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+  .round:hover { background: var(--raise-2); border-color: #2D3242; }
+  .round svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.7; }
+
+  .js-only { display: none; }
+  .js .js-only { display: grid; }
 
   /* ---------- balance ---------- */
-  .balance-block {
-    text-align: center;
-    padding: 10px 0 34px;
-    position: relative;
-  }
-
-  .balance-label {
-    font-size: 11px;
-    letter-spacing: .18em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
+  .balance { text-align: center; padding: 6px 0 20px; }
+  .balance-label { font-size: 10.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--faint); margin: 0 0 14px; }
 
   .amount-row {
-    display: inline-flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 2px;
-    padding: 4px 14px;
-    border-radius: var(--r-md);
-    border: 1px solid transparent;
+    display: inline-flex; align-items: baseline; gap: 2px;
+    padding: 6px 14px; border-radius: var(--r-md);
+    border: 1px solid transparent; cursor: text; max-width: 100%;
     transition: border-color .18s ease, background .18s ease;
-    cursor: text;
-    max-width: 100%;
   }
-  .amount-row:hover { border-color: var(--line); background: rgba(255,255,255,.02); }
-  .amount-row:focus-within {
-    border-color: rgba(231,194,125,.5);
-    background: rgba(231,194,125,.05);
-  }
+  .amount-row:hover { border-color: var(--line-soft); background: rgba(255,255,255,.02); }
+  .amount-row:focus-within { border-color: rgba(233,199,132,.55); background: rgba(233,199,132,.06); }
 
-  .currency {
-    font-size: 34px;
-    font-weight: 500;
-    color: var(--gold);
-    line-height: 1;
-    cursor: pointer;
-    user-select: none;
-    align-self: center;
-    padding-top: 4px;
-  }
+  .cur-lg { font-size: 32px; font-weight: 500; color: var(--gold); align-self: center; }
+  .cur::after, .cur-lg::after { content: "€"; }
+  .cur { color: inherit; }
 
   .amount {
-    font-size: 54px;
-    font-weight: 650;
-    letter-spacing: -.035em;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.06;
-    outline: none;
-    white-space: nowrap;
-    overflow-x: auto;
-    max-width: 100%;
-    scrollbar-width: none;
+    font-size: 56px; font-weight: 650; letter-spacing: -.04em; line-height: 1.05;
+    font-variant-numeric: tabular-nums; outline: none; white-space: nowrap;
+    overflow-x: auto; max-width: 100%; scrollbar-width: none;
   }
   .amount::-webkit-scrollbar { display: none; }
+  .cents { font-size: 30px; font-weight: 600; color: var(--muted); letter-spacing: -.02em; font-variant-numeric: tabular-nums; outline: none; }
 
-  .cents {
-    font-size: 30px;
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: -.02em;
-    font-variant-numeric: tabular-nums;
-    outline: none;
-    align-self: baseline;
+  .month-strip { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
+  .chip {
+    display: inline-flex; align-items: baseline; gap: 6px;
+    border: 1px solid var(--line-soft); background: var(--raise);
+    border-radius: 999px; padding: 7px 13px; font-size: 12px; color: var(--muted);
   }
+  .chip b { font-weight: 600; color: var(--text); font-variant-numeric: tabular-nums; }
+  .chip.up b { color: var(--mint); }
 
   /* ---------- quick actions ---------- */
-  .actions {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 30px;
-  }
+  .actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; margin: 24px 0 12px; }
 
   .action {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    padding: 14px 6px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 9px;
-    color: var(--text);
-    font-size: 11px;
-    letter-spacing: .01em;
-    cursor: pointer;
-    transition: transform .14s ease, background .16s ease, border-color .16s ease;
+    background: var(--raise); border: 1px solid var(--line-soft); border-radius: var(--r-md);
+    padding: 14px 4px 12px; display: flex; flex-direction: column; align-items: center; gap: 9px;
+    font-size: 11px; cursor: pointer; text-align: center;
+    transition: background .16s ease, border-color .16s ease, transform .14s ease;
   }
-  .action:hover { background: var(--surface-2); border-color: #2E323D; transform: translateY(-2px); }
+  .action:hover { background: var(--raise-2); transform: translateY(-2px); }
   .action:active { transform: translateY(0); }
   .action svg { width: 19px; height: 19px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
 
-  /* ---------- transactions ---------- */
-  .section-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 14px;
+  .sheet {
+    display: none; align-items: flex-start; gap: 12px;
+    border: 1px solid rgba(233,199,132,.28); background: rgba(233,199,132,.06);
+    border-radius: var(--r-md); padding: 14px 14px 14px 16px; margin-bottom: 18px;
   }
-
-  .section-head h2 {
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: -.01em;
-    margin: 0;
+  .sheet-body { flex: 1; }
+  .sheet-title { margin: 0 0 4px; font-size: 13px; font-weight: 600; color: var(--gold); }
+  .sheet-text { margin: 0; font-size: 12.5px; line-height: 1.5; color: var(--muted); }
+  .sheet-close {
+    flex: none; width: 24px; height: 24px; border-radius: 50%;
+    border: 1px solid var(--line); display: grid; place-items: center;
+    cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1;
   }
+  .sheet-close:hover { color: var(--text); }
 
-  .link-btn {
-    background: none;
-    border: none;
-    color: var(--gold);
-    font-size: 12px;
-    cursor: pointer;
-    padding: 4px 2px;
-    letter-spacing: .01em;
-  }
-  .link-btn:hover { text-decoration: underline; }
-
-  .day-label {
-    font-size: 11px;
-    letter-spacing: .14em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin: 20px 0 10px;
-  }
-  .day-label:first-of-type { margin-top: 4px; }
-
-  .ledger { display: flex; flex-direction: column; gap: 4px; }
-
-  .tx {
-    display: flex;
-    align-items: center;
-    gap: 11px;
-    padding: 11px 10px 11px 12px;
-    border-radius: var(--r-md);
-    transition: background .16s ease;
-    position: relative;
-  }
-  .tx:hover { background: var(--surface); }
-
-  .tx-avatar {
-    width: 42px; height: 42px;
-    border-radius: 50%;
-    flex: none;
-    display: grid;
-    place-items: center;
-    font-size: 14px;
-    font-weight: 600;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    color: var(--text);
-  }
-  .tx-avatar.in { color: var(--mint); border-color: rgba(95,211,160,.3); background: rgba(95,211,160,.08); }
-
-  .tx-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
-
-  .tx-name {
-    font-size: 14.5px;
-    font-weight: 500;
-    letter-spacing: -.005em;
-    outline: none;
-    border-radius: 5px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .tx-meta { font-size: 12px; color: var(--muted); }
-
-  .tx-amt {
-    font-size: 14.5px;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -.01em;
-    outline: none;
-    border-radius: 5px;
-    padding: 2px 4px;
-    white-space: nowrap;
-  }
-  .tx-amt.in { color: var(--mint); }
-
-  @keyframes tx-arrive {
-    from { background: rgba(231,194,125,.14); }
-    to   { background: transparent; }
-  }
-  .tx-new { animation: tx-arrive 1.6s ease-out 1; }
-
-  /* A flex item rather than an overlay: floating it over the row covered the
-     amount, and a hover-only control can't be reached on a touch screen. */
-  .tx-del {
-    flex: none;
-    width: 28px; height: 28px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-    background: var(--surface-2);
-    color: var(--muted);
-    display: grid;
-    place-items: center;
-    cursor: pointer;
-    font-size: 15px;
-    line-height: 1;
-    opacity: .4;
-    transition: opacity .16s ease, color .16s ease, border-color .16s ease;
-  }
-  .tx:hover .tx-del { opacity: 1; }
-  .tx-del:hover, .tx-del:focus-visible {
-    opacity: 1;
-    color: var(--coral);
-    border-color: rgba(255,107,107,.4);
-  }
-
-  [contenteditable]:focus {
-    background: rgba(231,194,125,.09);
-    box-shadow: 0 0 0 1px rgba(231,194,125,.35);
-  }
-
-  /* Sits in the section header, directly above where a new row appears —
-     a button further down the page would scroll the row out from under it. */
+  /* ---------- section furniture ---------- */
+  .section { margin-top: 26px; }
+  .section-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+  .section-head h2 { margin: 0; font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
   .head-tools { display: flex; align-items: center; gap: 8px; }
 
-  .add-tx {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 7px 13px 7px 10px;
-    border-radius: 999px;
-    border: 1px solid rgba(231,194,125,.4);
-    background: rgba(231,194,125,.08);
-    color: var(--gold);
-    font-size: 12.5px;
-    font-weight: 500;
-    cursor: pointer;
+  .link-btn {
+    background: none; border: none; color: var(--muted); font-size: 12px;
+    cursor: pointer; padding: 4px 2px;
+  }
+  .link-btn:hover { color: var(--text); text-decoration: underline; }
+
+  /* The Add control sits in the header, right above where a new row lands. */
+  .add-stack { display: grid; }
+  .add-stack label {
+    grid-area: 1 / 1;
+    display: none; align-items: center; gap: 5px;
+    padding: 7px 14px 7px 11px; border-radius: 999px;
+    border: 1px solid rgba(233,199,132,.42); background: rgba(233,199,132,.09);
+    color: var(--gold); font-size: 12.5px; font-weight: 500; cursor: pointer;
     transition: background .16s ease, border-color .16s ease;
   }
-  .add-tx:hover { background: rgba(231,194,125,.16); border-color: rgba(231,194,125,.7); }
-  .add-tx:active { background: rgba(231,194,125,.24); }
-  .add-tx svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+  .add-stack label[for="slot-1"] { display: inline-flex; }
+  .add-stack label:hover { background: rgba(233,199,132,.18); border-color: rgba(233,199,132,.7); }
+  .add-stack svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
 
-  /* ---------- bottom nav ---------- */
-  .nav {
-    position: fixed;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 100%;
-    max-width: var(--shell);
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 4px;
-    padding: 10px 16px calc(14px + env(safe-area-inset-bottom));
-    background: linear-gradient(180deg, rgba(11,12,16,.72), rgba(11,12,16,.98) 45%);
-    backdrop-filter: blur(14px);
-    border-top: 1px solid var(--line);
-    z-index: 20;
+  .day-label { font-size: 10.5px; letter-spacing: .16em; text-transform: uppercase; color: var(--faint); margin: 18px 0 8px; }
+  .ledger { display: flex; flex-direction: column; gap: 2px; }
+
+  .tx {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 8px 10px 10px; border-radius: var(--r-md);
+    transition: background .16s ease;
   }
+  .tx:hover { background: var(--raise); }
+  .tx.is-slot { display: none; }
 
-  .nav button {
-    background: none;
-    border: none;
-    color: var(--muted);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 5px;
-    font-size: 10.5px;
-    letter-spacing: .04em;
-    padding: 6px 0;
-    cursor: pointer;
-    border-radius: var(--r-sm);
+  .tx-avatar {
+    width: 42px; height: 42px; border-radius: 50%; flex: none;
+    display: grid; place-items: center; font-size: 13.5px; font-weight: 600;
+    background: var(--raise-2); border: 1px solid var(--line-soft);
+  }
+  .tx-avatar.in { color: var(--mint); border-color: rgba(79,214,160,.32); background: rgba(79,214,160,.08); }
+
+  .tx-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+  .tx-name { font-size: 14.5px; font-weight: 500; outline: none; border-radius: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-meta { font-size: 12px; color: var(--muted); outline: none; border-radius: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .tx-amt {
+    display: inline-flex; align-items: baseline; flex: none;
+    font-size: 14.5px; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap;
+  }
+  .tx-amt.in { color: var(--mint); }
+  .tx-num { outline: none; border-radius: 5px; padding: 1px 2px; }
+  .tx-sign {
+    background: none; border: none; padding: 0 1px 0 0; margin: 0;
+    color: inherit; font: inherit; cursor: default;
+  }
+  .js .tx-sign { cursor: pointer; }
+
+  .tx-del {
+    flex: none; width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--line-soft); background: var(--raise-2); color: var(--faint);
+    display: grid; place-items: center; cursor: pointer; font-size: 15px; line-height: 1;
+    opacity: .45; transition: opacity .16s ease, color .16s ease, border-color .16s ease;
+  }
+  .tx:hover .tx-del { opacity: 1; }
+  .tx-del:hover { color: var(--coral); border-color: rgba(255,111,111,.45); }
+
+  [contenteditable]:focus { background: rgba(233,199,132,.1); box-shadow: 0 0 0 1px rgba(233,199,132,.4); }
+
+  /* ---------- spending bars ---------- */
+  .bars { display: flex; flex-direction: column; gap: 14px; }
+  .bar-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .bar-name { font-size: 13px; }
+  .bar-val { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .bar-track { height: 6px; border-radius: 999px; background: var(--line-soft); overflow: hidden; }
+  .bar-fill { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--gold-deep), var(--gold)); }
+  .bar-fill.mint { background: linear-gradient(90deg, #2E9C74, var(--mint)); }
+  .bar-fill.plum { background: linear-gradient(90deg, var(--plum-a), var(--plum-b)); }
+
+  /* ---------- panels, lists, switches ---------- */
+  .panel { border: 1px solid var(--line-soft); background: var(--raise); border-radius: var(--r-lg); padding: 6px 14px; }
+  .panel + .panel { margin-top: 12px; }
+
+  .list-row { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line-soft); }
+  .list-row:last-child { border-bottom: none; }
+  .list-ico { width: 34px; height: 34px; border-radius: 10px; flex: none; display: grid; place-items: center; background: var(--raise-2); }
+  .list-ico svg { width: 17px; height: 17px; stroke: var(--gold); fill: none; stroke-width: 1.6; }
+  .list-label { flex: 1; font-size: 14px; }
+  .list-value { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .switch { display: flex; align-items: center; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line-soft); cursor: pointer; }
+  .switch:last-child { border-bottom: none; }
+  .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .switch-text { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .switch-label { font-size: 14px; }
+  .switch-note { font-size: 12px; color: var(--muted); }
+  .track {
+    flex: none; width: 46px; height: 27px; border-radius: 999px;
+    background: var(--raise-2); border: 1px solid var(--line);
+    display: flex; align-items: center; padding: 2px;
+    transition: background .18s ease, border-color .18s ease;
+  }
+  .knob {
+    width: 21px; height: 21px; border-radius: 50%; background: var(--faint);
+    transition: transform .18s ease, background .18s ease;
+  }
+  .switch input:checked ~ .track { background: rgba(233,199,132,.24); border-color: rgba(233,199,132,.55); }
+  .switch input:checked ~ .track .knob { transform: translateX(19px); background: var(--gold); }
+  .switch input:focus-visible ~ .track { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  /* ---------- people ---------- */
+  .people { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .person { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+  .person-av {
+    width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center;
+    background: linear-gradient(140deg, var(--plum-a), var(--plum-b));
+    border: 1px solid rgba(255,255,255,.1); font-size: 15px; font-weight: 600;
+  }
+  .person-name { font-size: 11.5px; outline: none; border-radius: 5px; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .person-note { font-size: 10px; color: var(--faint); }
+
+  /* ---------- currency picker ---------- */
+  .cur-picker { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 12px; }
+  .cur-picker label {
+    border: 1px solid var(--line); background: var(--raise-2); color: var(--muted);
+    border-radius: 999px; padding: 8px 15px; font-size: 13px; cursor: pointer;
+    transition: color .16s ease, border-color .16s ease, background .16s ease;
+  }
+  .cur-picker label:hover { color: var(--text); }
+
+  /* ---------- nav ---------- */
+  .nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: var(--shell); z-index: 20;
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px;
+    padding: 9px 14px calc(13px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, rgba(7,8,11,.86), var(--ink) 40%);
+    border-top: 1px solid var(--line-soft);
+  }
+  .nav label {
+    display: flex; flex-direction: column; align-items: center; gap: 5px;
+    font-size: 10.5px; letter-spacing: .03em; color: var(--faint);
+    padding: 6px 0; border-radius: var(--r-sm); cursor: pointer;
     transition: color .16s ease;
   }
-  .nav button svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
-  .nav button[aria-current="page"] { color: var(--gold); }
-  .nav button:hover { color: var(--text); }
+  .nav label:hover { color: var(--text); }
+  .nav svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
 
   /* ---------- toast ---------- */
   .toast {
-    position: fixed;
-    bottom: calc(96px + env(safe-area-inset-bottom));
-    left: 50%;
-    transform: translate(-50%, 12px);
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    color: var(--text);
-    padding: 10px 16px;
-    border-radius: 999px;
-    font-size: 13px;
-    opacity: 0;
-    pointer-events: none;
+    position: fixed; left: 50%; bottom: calc(92px + env(safe-area-inset-bottom));
+    transform: translate(-50%, 10px);
+    background: var(--raise-2); border: 1px solid var(--line); color: var(--text);
+    padding: 10px 16px; border-radius: 999px; font-size: 13px;
+    opacity: 0; pointer-events: none; z-index: 30;
     transition: opacity .2s ease, transform .2s ease;
-    z-index: 30;
   }
   .toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+  .foot-note { margin: 22px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--faint); text-align: center; }
+
   :focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { transition: none !important; animation: none !important; }
-  }
+  @keyframes arrive { from { background: rgba(233,199,132,.16); } to { background: transparent; } }
+  .tx-fresh { animation: arrive 1.5s ease-out 1; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+  /* ---------- generated state ---------- */
+  #tab-home:checked ~ main .screen-home { display: block; }
+  #tab-home:checked ~ .nav label[for="tab-home"] { color: var(--gold); }
+  #tab-home:focus-visible ~ .nav label[for="tab-home"] { outline: 2px solid var(--gold); outline-offset: 3px; }
+  #tab-cards:checked ~ main .screen-cards { display: block; }
+  #tab-cards:checked ~ .nav label[for="tab-cards"] { color: var(--gold); }
+  #tab-cards:focus-visible ~ .nav label[for="tab-cards"] { outline: 2px solid var(--gold); outline-offset: 3px; }
+  #tab-pay:checked ~ main .screen-pay { display: block; }
+  #tab-pay:checked ~ .nav label[for="tab-pay"] { color: var(--gold); }
+  #tab-pay:focus-visible ~ .nav label[for="tab-pay"] { outline: 2px solid var(--gold); outline-offset: 3px; }
+  #tab-you:checked ~ main .screen-you { display: block; }
+  #tab-you:checked ~ .nav label[for="tab-you"] { color: var(--gold); }
+  #tab-you:focus-visible ~ .nav label[for="tab-you"] { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+  #act-transfer:checked ~ main .sheet-transfer { display: flex; }
+  #act-transfer:checked ~ main label[for="act-transfer"] { border-color: rgba(233,199,132,.5); background: rgba(233,199,132,.1); }
+  #act-request:checked ~ main .sheet-request { display: flex; }
+  #act-request:checked ~ main label[for="act-request"] { border-color: rgba(233,199,132,.5); background: rgba(233,199,132,.1); }
+  #act-pay:checked ~ main .sheet-pay { display: flex; }
+  #act-pay:checked ~ main label[for="act-pay"] { border-color: rgba(233,199,132,.5); background: rgba(233,199,132,.1); }
+  #act-swap:checked ~ main .sheet-swap { display: flex; }
+  #act-swap:checked ~ main label[for="act-swap"] { border-color: rgba(233,199,132,.5); background: rgba(233,199,132,.1); }
+
+/* Reveal a blank row when its slot is switched on. */
+  #slot-1:checked ~ main .r-7 { display: flex; }
+  #slot-2:checked ~ main .r-8 { display: flex; }
+  #slot-3:checked ~ main .r-9 { display: flex; }
+  #slot-4:checked ~ main .r-10 { display: flex; }
+  #slot-5:checked ~ main .r-11 { display: flex; }
+  #slot-6:checked ~ main .r-12 { display: flex; }
+  #slot-7:checked ~ main .r-13 { display: flex; }
+  #slot-8:checked ~ main .r-14 { display: flex; }
+  #slot-9:checked ~ main .r-15 { display: flex; }
+  #slot-10:checked ~ main .r-16 { display: flex; }
+  #slot-11:checked ~ main .r-17 { display: flex; }
+  #slot-12:checked ~ main .r-18 { display: flex; }
+
+  /* Exactly one Add label shows at a time — stacking translucent copies
+     would pile their backgrounds into a solid block. Each press hides the
+     current label and reveals the next, so these hide rules come after. */
+  #slot-1:checked ~ main label[for="slot-2"] { display: inline-flex; }
+  #slot-2:checked ~ main label[for="slot-3"] { display: inline-flex; }
+  #slot-3:checked ~ main label[for="slot-4"] { display: inline-flex; }
+  #slot-4:checked ~ main label[for="slot-5"] { display: inline-flex; }
+  #slot-5:checked ~ main label[for="slot-6"] { display: inline-flex; }
+  #slot-6:checked ~ main label[for="slot-7"] { display: inline-flex; }
+  #slot-7:checked ~ main label[for="slot-8"] { display: inline-flex; }
+  #slot-8:checked ~ main label[for="slot-9"] { display: inline-flex; }
+  #slot-9:checked ~ main label[for="slot-10"] { display: inline-flex; }
+  #slot-10:checked ~ main label[for="slot-11"] { display: inline-flex; }
+  #slot-11:checked ~ main label[for="slot-12"] { display: inline-flex; }
+
+  #slot-1:checked ~ main label[for="slot-1"] { display: none; }
+  #slot-2:checked ~ main label[for="slot-2"] { display: none; }
+  #slot-3:checked ~ main label[for="slot-3"] { display: none; }
+  #slot-4:checked ~ main label[for="slot-4"] { display: none; }
+  #slot-5:checked ~ main label[for="slot-5"] { display: none; }
+  #slot-6:checked ~ main label[for="slot-6"] { display: none; }
+  #slot-7:checked ~ main label[for="slot-7"] { display: none; }
+  #slot-8:checked ~ main label[for="slot-8"] { display: none; }
+  #slot-9:checked ~ main label[for="slot-9"] { display: none; }
+  #slot-10:checked ~ main label[for="slot-10"] { display: none; }
+  #slot-11:checked ~ main label[for="slot-11"] { display: none; }
+  #slot-12:checked ~ main label[for="slot-12"] { display: none; }
+
+  /* Deleting wins over revealing, so these rules come last. */
+  #del-1:checked ~ main .r-1 { display: none; }
+  #del-2:checked ~ main .r-2 { display: none; }
+  #del-3:checked ~ main .r-3 { display: none; }
+  #del-4:checked ~ main .r-4 { display: none; }
+  #del-5:checked ~ main .r-5 { display: none; }
+  #del-6:checked ~ main .r-6 { display: none; }
+  #del-7:checked ~ main .r-7 { display: none; }
+  #del-8:checked ~ main .r-8 { display: none; }
+  #del-9:checked ~ main .r-9 { display: none; }
+  #del-10:checked ~ main .r-10 { display: none; }
+  #del-11:checked ~ main .r-11 { display: none; }
+  #del-12:checked ~ main .r-12 { display: none; }
+  #del-13:checked ~ main .r-13 { display: none; }
+  #del-14:checked ~ main .r-14 { display: none; }
+  #del-15:checked ~ main .r-15 { display: none; }
+  #del-16:checked ~ main .r-16 { display: none; }
+  #del-17:checked ~ main .r-17 { display: none; }
+  #del-18:checked ~ main .r-18 { display: none; }
+
+  /* The currency symbol is drawn from CSS so one radio changes them all. */
+  #cur-eur:checked ~ main .cur::after, #cur-eur:checked ~ main .cur-lg::after { content: "€"; }
+  #cur-usd:checked ~ main .cur::after, #cur-usd:checked ~ main .cur-lg::after { content: "$"; }
+  #cur-gbp:checked ~ main .cur::after, #cur-gbp:checked ~ main .cur-lg::after { content: "£"; }
+  #cur-chf:checked ~ main .cur::after, #cur-chf:checked ~ main .cur-lg::after { content: "CHF"; }
+  #cur-pln:checked ~ main .cur::after, #cur-pln:checked ~ main .cur-lg::after { content: "zł"; }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
 
-  <header class="topbar">
-    <div class="avatar" id="initials">G</div>
-    <div class="who">
-      <span class="hello">Good evening</span>
-      <span class="name" id="userName" contenteditable="true" spellcheck="false">Gabriel</span>
-    </div>
-    <div class="spacer"></div>
-    <button class="icon-btn" id="btnReset" title="Reset to defaults" aria-label="Reset to defaults">
-      <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
-    </button>
-    <button class="icon-btn" title="Notifications" aria-label="Notifications">
-      <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
-    </button>
-  </header>
+  <input class="state" type="radio" name="tab" id="tab-home" checked />
+  <input class="state" type="radio" name="tab" id="tab-cards" />
+  <input class="state" type="radio" name="tab" id="tab-pay" />
+  <input class="state" type="radio" name="tab" id="tab-you" />
 
-  <section class="balance-block">
-    <div class="balance-label">Total balance</div>
-    <div class="amount-row" id="amountRow">
-      <span class="currency" id="currency" title="Tap to change currency">€</span><span
-        class="amount" id="amount" contenteditable="true" spellcheck="false" inputmode="decimal">12 480</span><span
-        class="cents" id="cents" contenteditable="true" spellcheck="false" inputmode="numeric">,50</span>
-    </div>
-  </section>
+  <input class="state" type="radio" name="act" id="act-none" checked />
+  <input class="state" type="radio" name="act" id="act-transfer" />
+  <input class="state" type="radio" name="act" id="act-request" />
+  <input class="state" type="radio" name="act" id="act-pay" />
+  <input class="state" type="radio" name="act" id="act-swap" />
 
-  <nav class="actions" aria-label="Quick actions">
-    <button class="action" data-act="Transfer sent">
-      <svg viewBox="0 0 24 24"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
-      Transfer
-    </button>
-    <button class="action" data-act="Request created">
-      <svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
-      Request
-    </button>
-    <button class="action" data-act="Ready to pay">
-      <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
-      Pay
-    </button>
-    <button class="action" data-act="Exchange opened">
-      <svg viewBox="0 0 24 24"><path d="M3 8h14l-3-3"/><path d="M21 16H7l3 3"/></svg>
-      Exchange
-    </button>
+  <input class="state" type="radio" name="cur" id="cur-eur" data-k="cur-eur" checked />
+  <input class="state" type="radio" name="cur" id="cur-usd" data-k="cur-usd" />
+  <input class="state" type="radio" name="cur" id="cur-gbp" data-k="cur-gbp" />
+  <input class="state" type="radio" name="cur" id="cur-chf" data-k="cur-chf" />
+  <input class="state" type="radio" name="cur" id="cur-pln" data-k="cur-pln" />
+
+  <input class="state" type="checkbox" id="slot-1" data-k="slot-1" />
+  <input class="state" type="checkbox" id="slot-2" data-k="slot-2" />
+  <input class="state" type="checkbox" id="slot-3" data-k="slot-3" />
+  <input class="state" type="checkbox" id="slot-4" data-k="slot-4" />
+  <input class="state" type="checkbox" id="slot-5" data-k="slot-5" />
+  <input class="state" type="checkbox" id="slot-6" data-k="slot-6" />
+  <input class="state" type="checkbox" id="slot-7" data-k="slot-7" />
+  <input class="state" type="checkbox" id="slot-8" data-k="slot-8" />
+  <input class="state" type="checkbox" id="slot-9" data-k="slot-9" />
+  <input class="state" type="checkbox" id="slot-10" data-k="slot-10" />
+  <input class="state" type="checkbox" id="slot-11" data-k="slot-11" />
+  <input class="state" type="checkbox" id="slot-12" data-k="slot-12" />
+  <input class="state" type="checkbox" id="del-1" data-k="del-1" />
+  <input class="state" type="checkbox" id="del-2" data-k="del-2" />
+  <input class="state" type="checkbox" id="del-3" data-k="del-3" />
+  <input class="state" type="checkbox" id="del-4" data-k="del-4" />
+  <input class="state" type="checkbox" id="del-5" data-k="del-5" />
+  <input class="state" type="checkbox" id="del-6" data-k="del-6" />
+  <input class="state" type="checkbox" id="del-7" data-k="del-7" />
+  <input class="state" type="checkbox" id="del-8" data-k="del-8" />
+  <input class="state" type="checkbox" id="del-9" data-k="del-9" />
+  <input class="state" type="checkbox" id="del-10" data-k="del-10" />
+  <input class="state" type="checkbox" id="del-11" data-k="del-11" />
+  <input class="state" type="checkbox" id="del-12" data-k="del-12" />
+  <input class="state" type="checkbox" id="del-13" data-k="del-13" />
+  <input class="state" type="checkbox" id="del-14" data-k="del-14" />
+  <input class="state" type="checkbox" id="del-15" data-k="del-15" />
+  <input class="state" type="checkbox" id="del-16" data-k="del-16" />
+  <input class="state" type="checkbox" id="del-17" data-k="del-17" />
+  <input class="state" type="checkbox" id="del-18" data-k="del-18" />
+
+  <main>
+
+    <!-- ===================== HOME ===================== -->
+    <section class="screen screen-home">
+      <header class="topbar">
+        <span class="avatar" id="initials">G</span>
+        <span class="who">
+          <span class="eyebrow" id="greeting">Good evening</span>
+          <span class="who-name" contenteditable="true" spellcheck="false" data-k="user">Gabriel</span>
+        </span>
+        <span class="grow"></span>
+        <button type="button" class="round js-only" id="btnReset" title="Reset everything"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+        <button type="button" class="round" title="Notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 8-3 8h18s-3-1-3-8"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+      </header>
+
+      <div class="balance">
+        <p class="balance-label">Total balance</p>
+        <span class="amount-row" id="amountRow"><span class="cur-lg"></span><span class="amount" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="whole">12 480</span><span class="cents" contenteditable="true" spellcheck="false" inputmode="numeric" data-k="cents">,50</span></span>
+        <div class="month-strip">
+          <span class="chip">Spent <b><span class="cur"></span>76,78</b></span>
+          <span class="chip up">Received <b><span class="cur"></span>3 226,00</b></span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <label class="action" for="act-transfer">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5"/><path d="m5 12 7-7 7 7"/></svg>
+          <span>Transfer</span>
+        </label>
+        <label class="action" for="act-request">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg>
+          <span>Request</span>
+        </label>
+        <label class="action" for="act-pay">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7.5A2.5 2.5 0 0 1 4.5 5h15A2.5 2.5 0 0 1 22 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 16.5Z"/><path d="M2 10h20"/></svg>
+          <span>Pay</span>
+        </label>
+        <label class="action" for="act-swap">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h14l-3-3"/><path d="M21 16H7l3 3"/></svg>
+          <span>Exchange</span>
+        </label>
+      </div>
+
+      <div class="sheet sheet-transfer">
+        <div class="sheet-body">
+          <p class="sheet-title">Send money</p>
+          <p class="sheet-text">Pick a saved recipient from Payments, or edit any name in the list below — every field on this screen is yours to change.</p>
+        </div>
+        <label class="sheet-close" for="act-none" title="Close"><span aria-hidden="true">×</span><span class="sr-only">Close</span></label>
+      </div>
+
+      <div class="sheet sheet-request">
+        <div class="sheet-body">
+          <p class="sheet-title">Request money</p>
+          <p class="sheet-text">Share your Millennium handle and the amount lands in your balance. Tap the balance above to set it to whatever you like.</p>
+        </div>
+        <label class="sheet-close" for="act-none" title="Close"><span aria-hidden="true">×</span><span class="sr-only">Close</span></label>
+      </div>
+
+      <div class="sheet sheet-pay">
+        <div class="sheet-body">
+          <p class="sheet-title">Pay in store</p>
+          <p class="sheet-text">Hold the phone near the terminal. Card controls live in the Cards tab — freeze, contactless and online payments.</p>
+        </div>
+        <label class="sheet-close" for="act-none" title="Close"><span aria-hidden="true">×</span><span class="sr-only">Close</span></label>
+      </div>
+
+      <div class="sheet sheet-swap">
+        <div class="sheet-body">
+          <p class="sheet-title">Exchange</p>
+          <p class="sheet-text">Switch the symbol on your balance from the You tab: euro, dollar, pound, franc or złoty.</p>
+        </div>
+        <label class="sheet-close" for="act-none" title="Close"><span aria-hidden="true">×</span><span class="sr-only">Close</span></label>
+      </div>
+
+      <section class="section">
+        <div class="section-head">
+          <h2>Transactions</h2>
+          <div class="head-tools">
+            <div class="add-stack">
+              <label for="slot-12"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-11"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-10"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-9"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-8"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-7"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-6"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-5"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-4"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-3"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-2"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+              <label for="slot-1"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>Add</span></label>
+            </div>
+            <button type="button" class="link-btn js-only" id="btnClear">Clear</button>
+          </div>
+        </div>
+
+      <p class="day-label">Today</p>
+      <div class="ledger">
+        <div class="tx r-7 is-slot">
+          <span class="tx-avatar" data-k="av-7">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-7">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-7">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-7" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-7">0,00</span>
+          </span>
+          <label class="tx-del" for="del-7" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-8 is-slot">
+          <span class="tx-avatar" data-k="av-8">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-8">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-8">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-8" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-8">0,00</span>
+          </span>
+          <label class="tx-del" for="del-8" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-9 is-slot">
+          <span class="tx-avatar" data-k="av-9">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-9">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-9">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-9" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-9">0,00</span>
+          </span>
+          <label class="tx-del" for="del-9" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-10 is-slot">
+          <span class="tx-avatar" data-k="av-10">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-10">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-10">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-10" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-10">0,00</span>
+          </span>
+          <label class="tx-del" for="del-10" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-11 is-slot">
+          <span class="tx-avatar" data-k="av-11">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-11">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-11">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-11" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-11">0,00</span>
+          </span>
+          <label class="tx-del" for="del-11" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-12 is-slot">
+          <span class="tx-avatar" data-k="av-12">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-12">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-12">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-12" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-12">0,00</span>
+          </span>
+          <label class="tx-del" for="del-12" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-13 is-slot">
+          <span class="tx-avatar" data-k="av-13">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-13">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-13">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-13" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-13">0,00</span>
+          </span>
+          <label class="tx-del" for="del-13" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-14 is-slot">
+          <span class="tx-avatar" data-k="av-14">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-14">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-14">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-14" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-14">0,00</span>
+          </span>
+          <label class="tx-del" for="del-14" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-15 is-slot">
+          <span class="tx-avatar" data-k="av-15">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-15">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-15">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-15" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-15">0,00</span>
+          </span>
+          <label class="tx-del" for="del-15" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-16 is-slot">
+          <span class="tx-avatar" data-k="av-16">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-16">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-16">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-16" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-16">0,00</span>
+          </span>
+          <label class="tx-del" for="del-16" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-17 is-slot">
+          <span class="tx-avatar" data-k="av-17">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-17">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-17">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-17" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-17">0,00</span>
+          </span>
+          <label class="tx-del" for="del-17" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-18 is-slot">
+          <span class="tx-avatar" data-k="av-18">NP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-18">New payment</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-18">Tap to edit</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-18" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-18">0,00</span>
+          </span>
+          <label class="tx-del" for="del-18" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-1">
+          <span class="tx-avatar in" data-k="av-1">SN</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-1">Salary — Northwind Ltd</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-1">Incoming transfer</span>
+          </span>
+          <span class="tx-amt in">
+            <button type="button" class="tx-sign" data-k="sg-1" title="Switch between money in and out">+</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-1">3 200,00</span>
+          </span>
+          <label class="tx-del" for="del-1" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-2">
+          <span class="tx-avatar" data-k="av-2">CA</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-2">Carrefour</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-2">Groceries</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-2" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-2">48,20</span>
+          </span>
+          <label class="tx-del" for="del-2" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-3">
+          <span class="tx-avatar" data-k="av-3">SP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-3">Spotify</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-3">Subscription</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-3" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-3">10,99</span>
+          </span>
+          <label class="tx-del" for="del-3" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+      </div>
+      <p class="day-label">Yesterday</p>
+      <div class="ledger">
+        <div class="tx r-4">
+          <span class="tx-avatar" data-k="av-4">UB</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-4">Uber</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-4">Transport</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-4" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-4">14,60</span>
+          </span>
+          <label class="tx-del" for="del-4" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-5">
+          <span class="tx-avatar in" data-k="av-5">AR</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-5">Ana Ribeiro</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-5">Split — dinner</span>
+          </span>
+          <span class="tx-amt in">
+            <button type="button" class="tx-sign" data-k="sg-5" title="Switch between money in and out">+</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-5">26,00</span>
+          </span>
+          <label class="tx-del" for="del-5" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+        <div class="tx r-6">
+          <span class="tx-avatar" data-k="av-6">AP</span>
+          <span class="tx-body">
+            <span class="tx-name" contenteditable="true" spellcheck="false" data-k="nm-6">Apple</span>
+            <span class="tx-meta" contenteditable="true" spellcheck="false" data-k="mt-6">iCloud storage</span>
+          </span>
+          <span class="tx-amt">
+            <button type="button" class="tx-sign" data-k="sg-6" title="Switch between money in and out">−</button><span class="cur"></span><span class="tx-num" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="am-6">2,99</span>
+          </span>
+          <label class="tx-del" for="del-6" title="Remove"><span aria-hidden="true">×</span><span class="sr-only">Remove transaction</span></label>
+        </div>
+      </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Where it went</h2><span class="eyebrow">This month</span></div>
+        <div class="bars">
+
+        <div class="bar-row">
+          <div class="bar-head">
+            <span class="bar-name">Groceries</span>
+            <span class="bar-val"><span class="cur"></span>48,20</span>
+          </div>
+          <div class="bar-track"><span class="bar-fill" style="width:63%"></span></div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-head">
+            <span class="bar-name">Transport</span>
+            <span class="bar-val"><span class="cur"></span>14,60</span>
+          </div>
+          <div class="bar-track"><span class="bar-fill plum" style="width:19%"></span></div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-head">
+            <span class="bar-name">Subscriptions</span>
+            <span class="bar-val"><span class="cur"></span>13,98</span>
+          </div>
+          <div class="bar-track"><span class="bar-fill mint" style="width:18%"></span></div>
+        </div>
+        </div>
+      </section>
+
+      <p class="foot-note">Every figure on this screen is yours to edit — tap and type.</p>
+    </section>
+
+    <!-- ===================== CARDS ===================== -->
+    <section class="screen screen-cards">
+      <header class="topbar">
+        <span class="who"><span class="eyebrow">Millennium</span><span class="who-name">Cards</span></span>
+      </header>
+
+      <div class="balance">
+        <p class="balance-label">Card spending this month</p>
+        <span class="amount-row"><span class="cur-lg"></span><span class="amount" contenteditable="true" spellcheck="false" inputmode="decimal" data-k="card-whole">76</span><span class="cents" contenteditable="true" spellcheck="false" inputmode="numeric" data-k="card-cents">,78</span></span>
+      </div>
+
+      <section class="section">
+        <div class="section-head"><h2>Controls</h2></div>
+        <div class="panel">
+
+        <label class="switch">
+          <input type="checkbox" id="sw-freeze" data-k="sw-freeze" />
+          <span class="switch-text">
+            <span class="switch-label">Freeze card</span>
+            <span class="switch-note">Blocks every new payment</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="sw-online" data-k="sw-online" checked />
+          <span class="switch-text">
+            <span class="switch-label">Online payments</span>
+            <span class="switch-note">Web and in-app purchases</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="sw-contactless" data-k="sw-contactless" checked />
+          <span class="switch-text">
+            <span class="switch-label">Contactless</span>
+            <span class="switch-note">Tap to pay in store</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="sw-abroad" data-k="sw-abroad" />
+          <span class="switch-text">
+            <span class="switch-label">Payments abroad</span>
+            <span class="switch-note">Outside the euro area</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Limits</h2></div>
+        <div class="panel">
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7.5A2.5 2.5 0 0 1 4.5 5h15A2.5 2.5 0 0 1 22 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 16.5Z"/><path d="M2 10h20"/></svg></span>
+          <span class="list-label">Monthly limit</span>
+          <span class="list-value"><span class="cur"></span>2 000,00</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 11h12v9H6Z"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/></svg></span>
+          <span class="list-label">Single payment</span>
+          <span class="list-value"><span class="cur"></span>500,00</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg></span>
+          <span class="list-label">Cash withdrawal</span>
+          <span class="list-value"><span class="cur"></span>400,00</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12a10 10 0 0 1 14 0"/><path d="M8.5 15.5a5 5 0 0 1 7 0"/><path d="M12 19h.01"/></svg></span>
+          <span class="list-label">Contactless cap</span>
+          <span class="list-value"><span class="cur"></span>50,00</span>
+        </div>
+        </div>
+      </section>
+
+      <p class="foot-note">Freeze is off. Your card works everywhere contactless is accepted.</p>
+    </section>
+
+    <!-- ===================== PAYMENTS ===================== -->
+    <section class="screen screen-pay">
+      <header class="topbar">
+        <span class="who"><span class="eyebrow">Millennium</span><span class="who-name">Payments</span></span>
+      </header>
+
+      <section class="section">
+        <div class="section-head"><h2>Recent people</h2><span class="eyebrow">Editable</span></div>
+        <div class="people">
+
+        <div class="person">
+          <span class="person-av">AR</span>
+          <span class="person-name" contenteditable="true" spellcheck="false" data-k="p-AR-Split">Ana Ribeiro</span>
+          <span class="person-note">Split</span>
+        </div>
+
+        <div class="person">
+          <span class="person-av">TS</span>
+          <span class="person-name" contenteditable="true" spellcheck="false" data-k="p-TS-Rent">Tomás Silva</span>
+          <span class="person-note">Rent</span>
+        </div>
+
+        <div class="person">
+          <span class="person-av">MA</span>
+          <span class="person-name" contenteditable="true" spellcheck="false" data-k="p-MA-Coffee">Marta Alves</span>
+          <span class="person-note">Coffee</span>
+        </div>
+
+        <div class="person">
+          <span class="person-av">LC</span>
+          <span class="person-name" contenteditable="true" spellcheck="false" data-k="p-LC-Padel">Luís Costa</span>
+          <span class="person-note">Padel</span>
+        </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Scheduled</h2></div>
+        <div class="panel">
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A1.5 1.5 0 0 1 5.5 5h13A1.5 1.5 0 0 1 20 6.5V19a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M4 10h16"/><path d="M8 3v4"/><path d="M16 3v4"/></svg></span>
+          <span class="list-label">Rent — 1st of the month</span>
+          <span class="list-value"><span class="cur"></span>780,00</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/><path d="M15 9.2a3.4 3.4 0 0 0-2.8-1.4c-2.4 0-3.9 1.8-3.9 4.2s1.5 4.2 3.9 4.2A3.4 3.4 0 0 0 15 14.8"/><path d="M7.4 11.2h4.4"/><path d="M7.4 13.6h4.4"/></svg></span>
+          <span class="list-label">Savings transfer — Friday</span>
+          <span class="list-value"><span class="cur"></span>150,00</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7.5A2.5 2.5 0 0 1 4.5 5h15A2.5 2.5 0 0 1 22 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 16.5Z"/><path d="M2 10h20"/></svg></span>
+          <span class="list-label">Spotify — 12th</span>
+          <span class="list-value"><span class="cur"></span>10,99</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.2 2.8 7.6 7 9 4.2-1.4 7-4.8 7-9V6Z"/></svg></span>
+          <span class="list-label">Insurance — 20th</span>
+          <span class="list-value"><span class="cur"></span>34,50</span>
+        </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Split with friends</h2></div>
+        <div class="bars">
+
+        <div class="bar-row">
+          <div class="bar-head">
+            <span class="bar-name">Ana Ribeiro</span>
+            <span class="bar-val"><span class="cur"></span>26,00</span>
+          </div>
+          <div class="bar-track"><span class="bar-fill mint" style="width:72%"></span></div>
+        </div>
+
+        <div class="bar-row">
+          <div class="bar-head">
+            <span class="bar-name">Tomás Silva</span>
+            <span class="bar-val"><span class="cur"></span>14,50</span>
+          </div>
+          <div class="bar-track"><span class="bar-fill plum" style="width:40%"></span></div>
+        </div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ===================== YOU ===================== -->
+    <section class="screen screen-you">
+      <header class="topbar">
+        <span class="avatar" id="initials2">G</span>
+        <span class="who">
+          <span class="eyebrow">Millennium Metal</span>
+          <span class="who-name" contenteditable="true" spellcheck="false" data-k="user2">Gabriel</span>
+        </span>
+      </header>
+
+      <section class="section">
+        <div class="section-head"><h2>Currency</h2></div>
+        <div class="cur-picker">
+          <label for="cur-eur">€ <span class="sr-only">Euro</span></label>
+          <label for="cur-usd">$ <span class="sr-only">US dollar</span></label>
+          <label for="cur-gbp">£ <span class="sr-only">Pound</span></label>
+          <label for="cur-chf">CHF <span class="sr-only">Franc</span></label>
+          <label for="cur-pln">zł <span class="sr-only">Złoty</span></label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Security</h2></div>
+        <div class="panel">
+
+        <label class="switch">
+          <input type="checkbox" id="sw-face" data-k="sw-face" checked />
+          <span class="switch-text">
+            <span class="switch-label">Face ID</span>
+            <span class="switch-note">Unlock the app with your face</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="sw-notify" data-k="sw-notify" checked />
+          <span class="switch-text">
+            <span class="switch-label">Notifications</span>
+            <span class="switch-note">Alerts for every payment</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+
+        <label class="switch">
+          <input type="checkbox" id="sw-hide" data-k="sw-hide" />
+          <span class="switch-text">
+            <span class="switch-label">Hide balance in app switcher</span>
+            <span class="switch-note">Blur the amount on preview</span>
+          </span>
+          <span class="track" aria-hidden="true"><span class="knob"></span></span>
+        </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><h2>Account</h2></div>
+        <div class="panel">
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg></span>
+          <span class="list-label">Plan</span>
+          <span class="list-value">Metal</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"/></svg></span>
+          <span class="list-label">Country</span>
+          <span class="list-value">Portugal</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 5 6v6c0 4.2 2.8 7.6 7 9 4.2-1.4 7-4.8 7-9V6Z"/></svg></span>
+          <span class="list-label">Millennium since</span>
+          <span class="list-value">2019</span>
+        </div>
+
+        <div class="list-row">
+          <span class="list-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2"/><path d="M16 4h2a2 2 0 0 1 2 2v2"/><path d="M20 16v2a2 2 0 0 1-2 2h-2"/><path d="M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 10v1.5"/><path d="M15 10v1.5"/><path d="M9.5 15a3.5 3.5 0 0 0 5 0"/></svg></span>
+          <span class="list-label">App version</span>
+          <span class="list-value">1.2</span>
+        </div>
+        </div>
+      </section>
+
+      <p class="foot-note">Everything you edit is saved in this browser only.</p>
+    </section>
+
+  </main>
+
+  <nav class="nav" aria-label="Main">
+    <label for="tab-home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg><span>Home</span></label>
+    <label for="tab-cards"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 7.5A2.5 2.5 0 0 1 4.5 5h15A2.5 2.5 0 0 1 22 7.5v9a2.5 2.5 0 0 1-2.5 2.5h-15A2.5 2.5 0 0 1 2 16.5Z"/><path d="M2 10h20"/></svg><span>Cards</span></label>
+    <label for="tab-pay"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18Z"/><path d="M15 9.2a3.4 3.4 0 0 0-2.8-1.4c-2.4 0-3.9 1.8-3.9 4.2s1.5 4.2 3.9 4.2A3.4 3.4 0 0 0 15 14.8"/><path d="M7.4 11.2h4.4"/><path d="M7.4 13.6h4.4"/></svg><span>Payments</span></label>
+    <label for="tab-you"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg><span>You</span></label>
   </nav>
 
-  <section>
-    <div class="section-head">
-      <h2>Transactions</h2>
-      <div class="head-tools">
-        <button class="add-tx" id="btnAdd">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
-          Add
-        </button>
-        <button class="link-btn" id="btnClear">Clear all</button>
-      </div>
-    </div>
-    <div id="ledger"></div>
-  </section>
-
 </div>
-
-<nav class="nav" aria-label="Main">
-  <button aria-current="page" data-tab="Home">
-    <svg viewBox="0 0 24 24"><path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg>
-    Home
-  </button>
-  <button data-tab="Cards">
-    <svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
-    Cards
-  </button>
-  <button data-tab="Payments">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v10"/><path d="M15 9.5a3 3 0 0 0-3-1.5c-3 0-3 4 0 4s3 4 0 4a3 3 0 0 1-3-1.5"/></svg>
-    Payments
-  </button>
-  <button data-tab="Profile">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></svg>
-    Profile
-  </button>
-</nav>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
@@ -523,369 +1103,205 @@
 (function () {
   "use strict";
 
-  var STORE = "millennium.v1";
-  var CURRENCIES = ["€", "$", "£", "zł", "CHF"];
+  // Everything above already works without this script. What follows only adds
+  // number formatting, saving between visits, and small confirmations.
+  var root = document.documentElement;
+  root.className += " js";
 
-  var DEFAULTS = {
-    name: "Gabriel",
-    currency: "€",
-    amount: "12 480",
-    cents: ",50",
-    tx: [
-      { day: "Today",     name: "Salary — Northwind Ltd", meta: "Incoming transfer", amt: "3 200,00", in: true },
-      { day: "Today",     name: "Carrefour",              meta: "Groceries",         amt: "48,20",    in: false },
-      { day: "Today",     name: "Spotify",                meta: "Subscription",      amt: "10,99",    in: false },
-      { day: "Yesterday", name: "Uber",                   meta: "Transport",         amt: "14,60",    in: false },
-      { day: "Yesterday", name: "Ana Ribeiro",            meta: "Split — dinner",    amt: "26,00",    in: true },
-      { day: "Yesterday", name: "Apple",                  meta: "iCloud storage",    amt: "2,99",     in: false }
-    ]
-  };
+  var KEY = "millennium.v2";
+  var toastEl = document.getElementById("toast");
+  var timer;
 
-  var state = load();
-
-  var el = {
-    name:       document.getElementById("userName"),
-    initials:   document.getElementById("initials"),
-    currency:   document.getElementById("currency"),
-    amount:     document.getElementById("amount"),
-    cents:      document.getElementById("cents"),
-    amountRow:  document.getElementById("amountRow"),
-    ledger:     document.getElementById("ledger"),
-    toast:      document.getElementById("toast")
-  };
-
-  function load() {
-    try {
-      var raw = localStorage.getItem(STORE);
-      if (!raw) return clone(DEFAULTS);
-      var parsed = JSON.parse(raw);
-      if (!parsed || !Array.isArray(parsed.tx)) return clone(DEFAULTS);
-      return parsed;
-    } catch (e) {
-      return clone(DEFAULTS);
-    }
-  }
-
-  function save() {
-    try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* private mode */ }
-  }
-
-  function clone(o) { return JSON.parse(JSON.stringify(o)); }
-
-  var toastTimer;
   function toast(msg) {
-    el.toast.textContent = msg;
-    el.toast.classList.add("show");
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.toast.classList.remove("show"); }, 1800);
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(timer);
+    timer = setTimeout(function () { toastEl.classList.remove("show"); }, 1700);
   }
 
-  /* ---------- greeting + identity ---------- */
+  function fields() { return document.querySelectorAll("[data-k]"); }
 
-  function greeting() {
-    var h = new Date().getHours();
-    if (h < 12) return "Good morning";
-    if (h < 18) return "Good afternoon";
-    return "Good evening";
+  function read() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
   }
 
-  function renderIdentity() {
-    el.name.textContent = state.name;
-    el.initials.textContent = (state.name.trim()[0] || "M").toUpperCase();
-    document.querySelector(".hello").textContent = greeting();
+  function write() {
+    var data = {};
+    Array.prototype.forEach.call(fields(), function (node) {
+      var key = node.getAttribute("data-k");
+      if (node.tagName === "INPUT") data[key] = node.checked;
+      else if (node.isContentEditable) data[key] = node.textContent;
+    });
+    try { localStorage.setItem(KEY, JSON.stringify(data)); } catch (e) { /* storage off */ }
   }
 
-  /* ---------- balance ---------- */
+  function restore() {
+    var data = read();
+    if (!data) return;
+    Array.prototype.forEach.call(fields(), function (node) {
+      var key = node.getAttribute("data-k");
+      if (!(key in data)) return;
+      if (node.tagName === "INPUT") node.checked = !!data[key];
+      else if (node.isContentEditable && typeof data[key] === "string") node.textContent = data[key];
+    });
+  }
 
-  // Keeps only digits and the grouping spaces the user sees.
-  function cleanWhole(text) {
+  /* ---------- number shaping ---------- */
+
+  function groupWhole(text) {
     var digits = text.replace(/\D/g, "").slice(0, 12);
     if (!digits) return "0";
     digits = digits.replace(/^0+(?=\d)/, "");
     return digits.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   }
 
-  function cleanCents(text) {
+  function twoCents(text) {
     var digits = text.replace(/\D/g, "").slice(0, 2);
     while (digits.length < 2) digits += "0";
     return "," + digits;
   }
 
-  // Rewriting textContent replaces the text node and drops any caret inside it,
-  // so only touch a field whose text actually changed.
-  function setText(node, value) {
-    if (node.textContent !== value) node.textContent = value;
+  function fullAmount(text) {
+    var digits = text.replace(/\D/g, "").slice(0, 11) || "0";
+    while (digits.length < 3) digits = "0" + digits;
+    return groupWhole(digits.slice(0, -2)) + "," + digits.slice(-2);
   }
 
-  function renderBalance() {
-    setText(el.currency, state.currency);
-    setText(el.amount, state.amount);
-    setText(el.cents, state.cents);
-  }
-
-  function commitBalance() {
-    state.amount = cleanWhole(el.amount.textContent);
-    state.cents = cleanCents(el.cents.textContent);
-    renderBalance();
-    save();
-  }
-
-  el.amount.addEventListener("blur", commitBalance);
-  el.cents.addEventListener("blur", commitBalance);
-
-  // The cents field only holds two digits, so focusing it selects both —
-  // typing replaces rather than appending past the limit.
-  el.cents.addEventListener("focus", function () {
-    var range = document.createRange();
-    range.selectNodeContents(el.cents);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
+  Array.prototype.forEach.call(document.querySelectorAll(".amount"), function (node) {
+    node.addEventListener("blur", function () { node.textContent = groupWhole(node.textContent); write(); });
   });
 
-  [el.amount, el.cents].forEach(function (node) {
+  Array.prototype.forEach.call(document.querySelectorAll(".cents"), function (node) {
+    node.addEventListener("focus", function () {
+      var range = document.createRange();
+      range.selectNodeContents(node);
+      var sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+    node.addEventListener("blur", function () { node.textContent = twoCents(node.textContent); write(); });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll(".tx-num"), function (node) {
+    node.addEventListener("blur", function () { node.textContent = fullAmount(node.textContent); write(); });
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[contenteditable]"), function (node) {
     node.addEventListener("keydown", function (e) {
       if (e.key === "Enter") { e.preventDefault(); node.blur(); }
     });
     node.addEventListener("paste", function (e) {
       e.preventDefault();
       var text = (e.clipboardData || window.clipboardData).getData("text");
-      document.execCommand("insertText", false, text.replace(/[^\d]/g, ""));
+      var plain = /tx-num|amount|cents/.test(node.className) ? text.replace(/[^\d]/g, "") : text;
+      document.execCommand("insertText", false, plain);
     });
+    node.addEventListener("blur", write);
   });
 
-  // Clicking the padding around the number puts the caret in the whole-number
-  // field — but never steal focus from a field the click already landed in.
-  // Reformatting on blur changes the row's width, so the element under the
-  // cursor at mouseup may no longer be the one that was pressed.
-  el.amountRow.addEventListener("click", function () {
-    var active = document.activeElement;
-    if (active === el.amount || active === el.cents) return;
-    placeCaretEnd(el.amount);
-  });
-
-  el.currency.addEventListener("click", function () {
-    var i = CURRENCIES.indexOf(state.currency);
-    state.currency = CURRENCIES[(i + 1) % CURRENCIES.length];
-    renderBalance();
-    save();
-    toast("Currency set to " + state.currency);
-  });
-
-  function placeCaretEnd(node) {
-    node.focus();
-    var range = document.createRange();
-    range.selectNodeContents(node);
-    range.collapse(false);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
-
-  // Highlights the whole value so the first keystroke replaces it — used for
-  // placeholder text on a freshly added row.
-  function selectContents(node) {
-    node.focus();
-    var range = document.createRange();
-    range.selectNodeContents(node);
-    var sel = window.getSelection();
-    sel.removeAllRanges();
-    sel.addRange(range);
-  }
-
-  /* ---------- name ---------- */
-
-  el.name.addEventListener("blur", function () {
-    var v = el.name.textContent.replace(/\s+/g, " ").trim().slice(0, 28);
-    state.name = v || "Millennium";
-    renderIdentity();
-    save();
-  });
-  el.name.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") { e.preventDefault(); el.name.blur(); }
-  });
-
-  /* ---------- transactions ---------- */
+  /* ---------- names drive their avatar ---------- */
 
   function initialsOf(name) {
-    // Only word-like tokens count, so "Salary — Northwind" reads SN, not S—.
     var parts = name.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
     if (!parts.length) return "?";
-    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-    return (parts[0][0] + parts[1][0]).toUpperCase();
+    return (parts.length === 1 ? parts[0].slice(0, 2) : parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  function renderLedger() {
-    el.ledger.innerHTML = "";
-    var lastDay = null;
-
-    state.tx.forEach(function (t, index) {
-      if (t.day !== lastDay) {
-        lastDay = t.day;
-        var label = document.createElement("div");
-        label.className = "day-label";
-        label.textContent = t.day;
-        el.ledger.appendChild(label);
-
-        var group = document.createElement("div");
-        group.className = "ledger";
-        group.dataset.day = t.day;
-        el.ledger.appendChild(group);
-      }
-
-      el.ledger.lastElementChild.appendChild(buildRow(t, index));
-    });
-
-    if (!state.tx.length) {
-      var empty = document.createElement("div");
-      empty.className = "day-label";
-      empty.textContent = "No transactions yet";
-      el.ledger.appendChild(empty);
-    }
-  }
-
-  function buildRow(t, index) {
-    var row = document.createElement("div");
-    row.className = "tx";
-    row.dataset.index = index;
-
-    var av = document.createElement("div");
-    av.className = "tx-avatar" + (t.in ? " in" : "");
-    av.textContent = initialsOf(t.name);
-
-    var body = document.createElement("div");
-    body.className = "tx-body";
-
-    var name = document.createElement("div");
-    name.className = "tx-name";
-    name.contentEditable = "true";
-    name.spellcheck = false;
-    name.textContent = t.name;
-
-    var meta = document.createElement("div");
-    meta.className = "tx-meta";
-    meta.contentEditable = "true";
-    meta.spellcheck = false;
-    meta.textContent = t.meta;
-
-    body.appendChild(name);
-    body.appendChild(meta);
-
-    var amt = document.createElement("div");
-    amt.className = "tx-amt" + (t.in ? " in" : "");
-    amt.contentEditable = "true";
-    amt.spellcheck = false;
-    amt.textContent = (t.in ? "+" : "−") + state.currency + t.amt;
-    amt.title = "Click to edit — start with + for money in";
-
-    var del = document.createElement("button");
-    del.className = "tx-del";
-    del.type = "button";
-    del.textContent = "×";
-    del.setAttribute("aria-label", "Delete transaction");
+  Array.prototype.forEach.call(document.querySelectorAll(".tx"), function (row) {
+    var name = row.querySelector(".tx-name");
+    var av = row.querySelector(".tx-avatar");
+    var sign = row.querySelector(".tx-sign");
+    var amt = row.querySelector(".tx-amt");
 
     name.addEventListener("blur", function () {
-      t.name = name.textContent.trim().slice(0, 40) || "Untitled";
-      name.textContent = t.name;
-      av.textContent = initialsOf(t.name);
-      save();
+      name.textContent = name.textContent.trim().slice(0, 40) || "Untitled";
+      av.textContent = initialsOf(name.textContent);
+      write();
     });
 
-    meta.addEventListener("blur", function () {
-      t.meta = meta.textContent.trim().slice(0, 40) || "Payment";
-      meta.textContent = t.meta;
-      save();
+    sign.addEventListener("click", function () {
+      var inbound = sign.textContent.trim() !== "+";
+      sign.textContent = inbound ? "+" : "−";
+      amt.classList.toggle("in", inbound);
+      av.classList.toggle("in", inbound);
+      write();
     });
+  });
 
-    amt.addEventListener("focus", function () {
-      amt.textContent = (t.in ? "+" : "") + t.amt;
-    });
-
-    amt.addEventListener("blur", function () {
-      var raw = amt.textContent;
-      t.in = /^\s*\+/.test(raw);
-      var digits = raw.replace(/\D/g, "").slice(0, 11) || "0";
-      while (digits.length < 3) digits = "0" + digits;
-      var whole = digits.slice(0, -2).replace(/^0+(?=\d)/, "");
-      whole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-      t.amt = whole + "," + digits.slice(-2);
-      amt.classList.toggle("in", t.in);
-      av.classList.toggle("in", t.in);
-      amt.textContent = (t.in ? "+" : "−") + state.currency + t.amt;
-      save();
-    });
-
-    [name, meta, amt].forEach(function (node) {
-      node.addEventListener("keydown", function (e) {
-        if (e.key === "Enter") { e.preventDefault(); node.blur(); }
-      });
-    });
-
-    del.addEventListener("click", function () {
-      state.tx.splice(index, 1);
-      save();
-      renderLedger();
-      toast("Transaction removed");
-    });
-
-    row.appendChild(av);
-    row.appendChild(body);
-    row.appendChild(amt);
-    row.appendChild(del);
-    return row;
+  // The account avatar takes a single letter — "GA" for Gabriel reads like a
+  // company monogram rather than a person.
+  function ownInitial(name) {
+    var parts = name.split(/[^\p{L}\p{N}]+/u).filter(Boolean);
+    if (!parts.length) return "M";
+    return (parts.length === 1 ? parts[0][0] : parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  document.getElementById("btnAdd").addEventListener("click", function () {
-    state.tx.unshift({ day: "Today", name: "New payment", meta: "Tap to edit", amt: "0,00", in: false });
-    save();
-    renderLedger();
+  function syncUser() {
+    var name = document.querySelector('[data-k="user"]').textContent.trim() || "Millennium";
+    document.getElementById("initials").textContent = ownInitial(name);
+    document.getElementById("initials2").textContent = ownInitial(name);
+    var twin = document.querySelector('[data-k="user2"]');
+    if (twin.textContent !== name) twin.textContent = name;
+  }
 
-    // The new row goes to the top of the ledger, well above the button that
-    // was just pressed, so bring it into view and select its placeholder.
-    var row = el.ledger.querySelector(".tx");
-    if (!row) return;
-    row.classList.add("tx-new");
-    row.scrollIntoView({ block: "center", behavior: "smooth" });
-    selectContents(row.querySelector(".tx-name"));
-    toast("Transaction added");
+  document.querySelector('[data-k="user"]').addEventListener("blur", syncUser);
+  document.querySelector('[data-k="user2"]').addEventListener("blur", function () {
+    document.querySelector('[data-k="user"]').textContent = this.textContent.trim() || "Millennium";
+    syncUser();
+    write();
+  });
+
+  /* ---------- add / clear ---------- */
+
+  Array.prototype.forEach.call(document.querySelectorAll('.add-stack label'), function (label) {
+    label.addEventListener("click", function () {
+      var id = label.getAttribute("for").replace("slot-", "");
+      var row = document.querySelector(".r-" + (6 + Number(id)));
+      setTimeout(function () {
+        row.classList.add("tx-fresh");
+        var name = row.querySelector(".tx-name");
+        name.focus();
+        var range = document.createRange();
+        range.selectNodeContents(name);
+        var sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+        write();
+      }, 0);
+      toast("Transaction added");
+    });
   });
 
   document.getElementById("btnClear").addEventListener("click", function () {
-    if (!state.tx.length) { toast("Nothing to clear"); return; }
-    state.tx = [];
-    save();
-    renderLedger();
-    toast("Transactions cleared");
+    var hid = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('[id^="del-"]'), function (box) {
+      var row = document.querySelector(".r-" + box.id.replace("del-", ""));
+      if (row && getComputedStyle(row).display !== "none") { box.checked = true; hid++; }
+    });
+    write();
+    toast(hid ? "Transactions cleared" : "Nothing to clear");
   });
 
   document.getElementById("btnReset").addEventListener("click", function () {
-    state = clone(DEFAULTS);
-    save();
-    renderAll();
-    toast("Reset to defaults");
+    try { localStorage.removeItem(KEY); } catch (e) { /* storage off */ }
+    location.reload();
   });
 
-  Array.prototype.forEach.call(document.querySelectorAll(".action"), function (b) {
-    b.addEventListener("click", function () { toast(b.dataset.act); });
+  /* ---------- greeting, saving, tab feedback ---------- */
+
+  var hour = new Date().getHours();
+  document.getElementById("greeting").textContent =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
+  Array.prototype.forEach.call(document.querySelectorAll(".state, .switch input"), function (input) {
+    input.addEventListener("change", write);
   });
 
-  Array.prototype.forEach.call(document.querySelectorAll(".nav button"), function (b) {
-    b.addEventListener("click", function () {
-      Array.prototype.forEach.call(document.querySelectorAll(".nav button"), function (o) {
-        o.removeAttribute("aria-current");
-      });
-      b.setAttribute("aria-current", "page");
-      toast(b.dataset.tab);
-    });
-  });
-
-  function renderAll() {
-    renderIdentity();
-    renderBalance();
-    renderLedger();
-  }
-
-  renderAll();
+  restore();
+  syncUser();
 })();
 </script>
 </body>
